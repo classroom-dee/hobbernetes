@@ -1,36 +1,33 @@
 document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('widgetGrid');
-    const repo = 'boolYikes/widgets';
-    const branch = 'main';
-    const widgetDir = 'widgets';
+    const baseURL = 'https://boolYikes.github.io/widgets/'; // Your GitHub Pages URL for the widgets directory
 
-    fetch(`https://api.github.com/repos/${repo}/contents/${widgetDir}?ref=${branch}`)
+    // Fetch the widget list from widgets.json
+    fetch(`${baseURL}widgets.json`)
     .then(response => {
         if (!response.ok) {
-            throw new Error(`Failed to fetch widget list: ${response.status}`);
+            throw new Error('Failed to fetch widget list');
         }
         return response.json();
     })
-    .then(files => {
-        files
-        .filter(file => file.name.endsWith('.html'))
-        .forEach(file => {
-            const iframe = document.createElement('iframe');
-            iframe.src = file.download_url;
-            iframe.className = 'widget';
-            iframe.style.width = '100%';
-            iframe.style.height = '200px';
+    .then(widgets => {
+    // For each widget in the list, create an iframe
+        widgets.forEach(widget => {
+        const iframe = document.createElement('iframe');
+        iframe.src = `${baseURL}${widget}`; // Embed widget from GitHub Pages
+        iframe.className = 'widget';
+        iframe.style.width = '100%';
+        iframe.style.height = '200px';
+        
+        const container = document.createElement('div');
+        container.className = 'widget';
+        container.appendChild(iframe);
 
-            const container = document.createElement('div');
-            container.className = 'widget';
-            container.appendChild(iframe);
-
-            grid.appendChild(container);
+        grid.appendChild(container);
         });
     })
     .catch(error => {
-        console.error(`Error loading widgets: ${error}`);
-        grid.innerHTML = `<p>Error loading widgets. Try again later!</p>`;
+        console.error('Error loading widgets:', error);
+        grid.innerHTML = `<p>Error loading widgets.</p>`;
     });
-
 });
