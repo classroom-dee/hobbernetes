@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const baseURL = 'https://boolYikes.github.io/widgets/'; // Your GitHub Pages URL for the widgets directory
 
     // Fetch the widget list from widgets.json
-    fetch(`${baseURL}widgets.json`)
+    fetch(`${baseURL}widgets/widgets.json`)
     .then(response => {
         if (!response.ok) {
             throw new Error('Failed to fetch widget list');
