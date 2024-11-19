@@ -1,8 +1,51 @@
 # *THESE ARE TBD*
 ## Project Setup
 ## The Backbone
-### I. Docker
-DO NOT COPY PASTE THE WHOLE BLOCK LOL
+### I. Hyper-V
+i. Host setup
+- This will be the master node.
+- Req: Win 10 Pro or NT?
+- In Bios, enable virtualization(method varies).
+- Enable the feature on Hyper Visor Manager, restart PC
+ii. VM
+- *External Switch* for the network adaptor
+- *Dynamic Memory* minimum set to 4GB
+- *CPUs* set to at least 2: check `htop` or `lscpu` to confirm the number of cpus. If the setting's not working, refer to Hyper-V docs.
+### II. Environment
+Applies to master and worker nodes alike from here on out!</br>
+i. Host config</br>
+Get the network interface's ipv4 address of ALL NODES. Mines are 192.168.0.8 and 100.</br>
+`sudo vi /etc/hosts`</br>
+then, add:
+```plaintext
+...
+192.168.0.8 master
+192.168.0.100 worker-01
+...
+```
+ii. Firewalls</br>
+Disable the frontend firewall. For Redhat base OS, it's firewalld.</br>
+```bash
+sudo ufw disable
+sudo systemctl stop ufw
+sudo systemctl disable ufw
+sudo systemctl mask --now ufw
+```
+then,
+```bash
+cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
+```
+then,
+```bash
+sudo sysctl --system
+```
+
+
+### III. Docker
+*DO NOT COPY PASTE THE WHOLE BLOCK* LOL
 ```bash
 # DO NOT remove containerd. it might ship as default on you distro
 
@@ -29,10 +72,30 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plug
 sudo usermod -aG docker $USER
 newgrp docker
 ```
-### II. CRI-Dockerd
+### IV. CRI-Dockerd
 1. CHECK YOUR OS COMPAT!! Mine is Ubuntu 24.04 noble</br>
-`*the mirantis doc goes here.* if it works, skip 2.`</br>
-2. In this file:(It could pre-exist or be empty)</br>
+Excerpt from the Mirantis doc.</br>
+```shell
+git clone https://github.com/Mirantis/cri-dockerd.git
+# STOP and install golang : https://go.dev/doc/install
+# ONCE DONE,
+cd cri-dockerd
+ARCH=amd64 make cri-dockerd
+sudo mkdir -p /usr/local/bin
+sudo install -o root -g root -m 0755 cri-dockerd /usr/local/bin/cri-dockerd
+sudo install packaging/systemd/* /etc/systemd/system
+sudo sed -i -e 's,/usr/bin/cri-dockerd,/usr/local/bin/cri-dockerd,' /etc/systemd/system/cri-docker.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now cri-docker.socket
+```
+then, inside `sudo nano /etc/systemd/system/multi-user.target.wants/cri-docker.service` edit line,</br>
+```yaml
+ExecStart=/usr/local/bin/cri-dockerd --container-runtime-endpoint fd:// --network-plugin=cni --pod-cidr=10.244.0.0/16
+```
+then,</br>
+`sudo systemctl daemon-reload`
+2. DO THIS ONLY IF `docker info | grep Cgroup` shows `cgroupfs`, not `systemd`</br>
+In this file:(It could pre-exist or be empty)</br>
 `sudo nano /etc/docker/daemon.json`</br>
 add this code:</br>
 `{
@@ -42,7 +105,7 @@ then, execute:</br>
 `sudo systemctl restart docker`</br>
 3. finally, </br>
 `sudo chmod 666 /var/run/cri-dockerd.sock`</br>
-### III. Kubes
+### V. Kubes
 ```bash
 # update repos
 sudo apt-get update
@@ -66,18 +129,40 @@ sudo apt-mark hold kubelet kubeadm kubectl
     d. If using Docker Engine, don't forget the Unix socket parameter for cri-dockerd
     e. Always do dry run first so you don't have to reset and start all over again ...
 i. 
-<strong>*THIS IS NOT PERSISTENT ACROSS REBOOTS*</strong>:</br>
 `crictl config --set runtime-endpoint=unix:///var/run/cri-dockerd.sock`</br>
 ii. `sudo systemctl start cri-docker`</br>
 iii. `sudo systemctl enable cri-docker`</br>
 iv. Switch to root for ease of use `sudo -i`</br>
-v. *NOT PERSISTENT* : `sudo swapoff -a`</br>
-vi. *Choose vi. alone OR vii. ~</br>
+v. `sudo sed -i '/swap/d' /etc/fstab` and then *reboot*</br>
+vi. Init CP</br>
 ```bash
 sudo kubeadm init \
 --cri-socket unix:///var/run/cri-dockerd.sock \
 --pod-network-cidr 10.244.0.0/16
 ```
+### V. Kubectl config
+```bash
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+```
+### VI. Network plugin
+`kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.29.0/manifests/tigera-operator.yaml`</br>
+then, </br>
+`wget https://raw.githubusercontent.com/projectcalico/calico/v3.29.0/manifests/custom-resources.yaml`</br>
+then,</br>
+`nano custom-resources.yaml`</br>
+and edit line: </br>
+`cidr: 10.244.0.0/16`</br>
+confirm pods running:</br>
+`watch kubectl get pods -n calico-system`</br>
+"taint" nodes, which means to make a node available for pods</br>
+`kubectl taint nodes --all node-role.kubernetes.io/control-plane-`</br>
+confirm node exposure:</br>
+`kubectl get nodes -o wide`</br>
+
+
+## NOT-USED Settings
 vii.
 ```yaml
 # write a config anywhere
