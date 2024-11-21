@@ -10,7 +10,7 @@ i. Host setup
 - This will be the master node.
 - Req: Win 10 Pro or NT?
 - In Bios, enable virtualization(method varies).
-- Enable the feature on Hyper Visor Manager, restart PC
+- Enable the feature on Hyper Visor Manager, restart PC</br>
 ii. VM
 - *External Switch* for the network adaptor
 - *Dynamic Memory* minimum set to 4GB
@@ -77,8 +77,8 @@ sudo usermod -aG docker $USER
 newgrp docker
 ```
 ### IV. CRI-Dockerd
-1. CHECK YOUR OS COMPAT!! Mine is Ubuntu 24.04 noble</br>
-Excerpt from the Mirantis doc.</br>
+*CHECK YOUR OS COMPAT!!* Mine is Ubuntu 24.04 noble</br>
+An excerpt from the Mirantis doc.</br>
 ```shell
 git clone https://github.com/Mirantis/cri-dockerd.git
 # STOP and install golang : https://go.dev/doc/install
