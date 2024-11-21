@@ -1,4 +1,4 @@
-# *THESE ARE TBD*
+# *WIP*
 ## Environment
 - Master node: Ubuntu 24.04 server on Hyper-V on Windows 10 Pro
 - Worker node: Ubuntu 24.04 server on a baremetal, dedicated server
