@@ -97,7 +97,7 @@ then, inside `sudo nano /etc/systemd/system/multi-user.target.wants/cri-docker.s
 ExecStart=/usr/local/bin/cri-dockerd --container-runtime-endpoint fd:// --network-plugin=cni --pod-cidr=10.244.0.0/16
 ```
 then,</br>
-`sudo systemctl daemon-reload`
+`sudo systemctl daemon-reload`</br>
 2. DO THIS ONLY IF `docker info | grep Cgroup` shows `cgroupfs`, not `systemd`</br>
 In this file:(It could pre-exist or be empty)</br>
 `sudo nano /etc/docker/daemon.json`</br>
