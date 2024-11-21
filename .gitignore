@@ -1,6 +1,7 @@
 # project-specific settings
 *.deb
 cri-dockerd-0.3.15/
+server/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,5 +1,9 @@
 # *THESE ARE TBD*
-## Project Setup
+## Environment
+- Master node: Ubuntu 24.04 server on Hyper-V on Windows 10 Pro
+- Worker node: Ubuntu 24.04 server on a baremetal, dedicated server
+- Networking: All nodes on WAN connection behind a simple router.
+## Setup Overview
 ## The Backbone
 ### I. Hyper-V
 i. Host setup
@@ -163,7 +167,8 @@ confirm node exposure:</br>
 
 
 ## NOT-USED Settings
-vii.
+THESE WERE USED RIGHT BEFORE INIT</br>
+vi.
 ```yaml
 # write a config anywhere
 apiVersion: kubeadm.k8s.io/v1beta3
