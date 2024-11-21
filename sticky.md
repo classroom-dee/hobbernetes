@@ -15,7 +15,7 @@ ii. VM
 - *External Switch* for the network adaptor
 - *Dynamic Memory* minimum set to 4GB
 - *CPUs* set to at least 2: check `htop` or `lscpu` to confirm the number of cpus. If the setting's not working, refer to Hyper-V docs.
-### II. Environment
+### II. Host machine settings
 Applies to master and worker nodes alike from here on out!</br>
 i. Host config</br>
 Get the network interface's ipv4 address of ALL NODES. Mines are 192.168.0.8 and 100.</br>
