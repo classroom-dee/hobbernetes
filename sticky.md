@@ -77,6 +77,7 @@ sudo usermod -aG docker $USER
 newgrp docker
 ```
 ### IV. CRI-Dockerd
+<strong>1.This is needed unless you hate Docker</strong></br>
 *CHECK YOUR OS COMPAT!!* Mine is Ubuntu 24.04 noble</br>
 An excerpt from the Mirantis doc.</br>
 ```shell
@@ -98,7 +99,7 @@ ExecStart=/usr/local/bin/cri-dockerd --container-runtime-endpoint fd:// --networ
 ```
 then,</br>
 `sudo systemctl daemon-reload`</br>
-2. DO THIS ONLY IF `docker info | grep Cgroup` shows `cgroupfs`, not `systemd`</br>
+<strong>2. DO THIS ONLY IF `docker info | grep Cgroup` shows `cgroupfs`, not `systemd`</strong></br>
 In this file:(It could pre-exist or be empty)</br>
 `sudo nano /etc/docker/daemon.json`</br>
 add this code:</br>
