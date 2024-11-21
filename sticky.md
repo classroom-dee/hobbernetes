@@ -79,10 +79,10 @@ newgrp docker
 ### IV. CRI-Dockerd
 <strong>1.This is needed unless you hate Docker</strong></br>
 *CHECK YOUR OS COMPAT!!* Mine is Ubuntu 24.04 noble</br>
+Install Go lang : https://go.dev/doc/install</br>
 An excerpt from the Mirantis doc.</br>
 ```shell
 git clone https://github.com/Mirantis/cri-dockerd.git
-# STOP and install golang : https://go.dev/doc/install
 # ONCE DONE,
 cd cri-dockerd
 ARCH=amd64 make cri-dockerd
@@ -98,7 +98,8 @@ then, inside `sudo nano /etc/systemd/system/multi-user.target.wants/cri-docker.s
 ExecStart=/usr/local/bin/cri-dockerd --container-runtime-endpoint fd:// --network-plugin=cni --pod-cidr=10.244.0.0/16
 ```
 then,</br>
-`sudo systemctl daemon-reload`</br>
+check `sudo nano /etc/crictl.yaml` if `runtime-endpoint` is set to `unix:///var/run/cri-dockerd.sock`. If not, add it.</br>
+then finally, `sudo systemctl daemon-reload`</br>
 <strong>2. DO THIS ONLY IF `docker info | grep Cgroup` shows `cgroupfs`, not `systemd`</strong></br>
 In this file:(It could pre-exist or be empty)</br>
 `sudo nano /etc/docker/daemon.json`</br>
@@ -108,7 +109,7 @@ add this code:</br>
 }`</br>
 then, execute:</br>
 `sudo systemctl restart docker`</br>
-3. finally, </br>
+and finally, </br>
 `sudo chmod 666 /var/run/cri-dockerd.sock`</br>
 ### V. Kubes
 ```bash
@@ -139,12 +140,13 @@ ii. `sudo systemctl start cri-docker`</br>
 iii. `sudo systemctl enable cri-docker`</br>
 iv. Switch to root for ease of use `sudo -i`</br>
 v. `sudo sed -i '/swap/d' /etc/fstab` and then *reboot*</br>
-vi. Init CP</br>
+vi. Init CP: Initially i was gonna use Flannel hence the cidr block but it doesn't matter now that i'm using Calico. Just be consistent.</br>
 ```bash
 sudo kubeadm init \
 --cri-socket unix:///var/run/cri-dockerd.sock \
 --pod-network-cidr 10.244.0.0/16
 ```
+This'll output instructions on how to join nodes. Write down the token and hash. They expire after 24h. We'll talk about this later. (See 'Joining a node')
 ### V. Kubectl config
 ```bash
 mkdir -p $HOME/.kube
@@ -166,8 +168,46 @@ confirm pods running:</br>
 confirm node exposure:</br>
 `kubectl get nodes -o wide`</br>
 
-
-## NOT-USED Settings
+## Joining a node
+### I. Follow the above guide
+- Not to the tee though. Always crosscheck with your environment.
+- Follow up until you reach the `kubeadm init` part.
+### II. The token
+1. <strong>FROM YOUR MASTER NODE</strong>, If you've been a good boi/gal and wrote down the token and hash, `skip 2. to 4`.
+2. If 24h hasn't passed since you have created the token: `sudo kubeadm token list` and write it down.
+3. If it's expired, `sudo kubeadm token create` and keep a memo.
+4. To get the hash, `sudo cat /etc/kubernetes/pki/ca.crt | openssl x509 -pubkey  | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'`
+5. <strong>FROM YOUR WORKER NODE</strong>, Join: </br>
+`sudo kubeadm join --token <token> <cp-host>:<cp-port> --discovery-token-ca-cert-hash sha256:<hash>`
+6. <strong>IF YOU GET THE multiple container runtime socket ERROR</strong> follow 7. ~ 8.
+7. `sudo nano pick-a-name.yaml` and then,
+```yaml
+apiVersion: kubeadm.k8s.io/v1beta4
+kind: JoinConfiguration
+discovery:
+  bootstrapToken:
+    apiServerEndpoint: <master-ip>:6443
+    token: <token>
+    caCertHashes:
+    - sha256:<ca-cert-hash>
+nodeRegistration:
+  criSocket: unix:///var/run/cri-dockerd.sock
+```
+8. `sudo kubeadm join --config pick-a-name.yaml`
+9. Confirm that it has joined the mob: The cp has to propagate Calico and other things so be patient
+![alt text](image.png)
+### III. Role
+1. Initially the worker node's role is labeled none. I'm still investigating if that's the default or not. But I went on to modifying it anyways: `kubectl label nodes <worker-name> node-role.kubernetes.io/worker=worker`</br>
+2. The syntax means to asign *'worker'* label to the nodes that have the *'role key'* of a name *'node-role.kubernetes.io/worker'*
+---
+## Ready to Deploy
+### Coming soon...
+## TODOs
+- [ ] kubectl drain for gracefule shutdown
+- [ ] investigate autoscaling mechanism
+- [ ] how node certificate redemption is handled?
+# Addendum
+## I. Custom init config
 THESE WERE USED RIGHT BEFORE INIT</br>
 vi.
 ```yaml
@@ -209,13 +249,21 @@ kubeadm init \
 - Set up kubelet, kubectl
 - Replicate the process on other node, this time with `join`
 
+## II. Migrating UFW rules
+### NO I DID NOT WANT TO DO IT PROGRAMMATICALLY 😣
+1. `sudo ufw status` to check your rules.</br>
+2. If a rule states `5432/tcp ALLOW Anywhere` then, `sudo iptables -A INPUT -p tcp --dport 5432 -j ACCEPT`
+3. If a rule states `5432 ALLOW 123.1.0.0/16 -j ACCEPT` then, `sudo iptables -A INPUT -p tcp --deport 5432 -s 123.1.0.0/16 -j ACCEPT`
+4. Same rule goes for ip6tables for ipv6 rules.
 
-
-
-
-
-
-
-
-
+## III. Node control
+1. To access the CP api from outside the cluster,
+2. Install kubectl on the client machine.
+3. From the client, `scp <cp-node-user-name>@<cp-host>:/etc/kubernetes/admin.conf .`
+4. Test it: `kubectl --kubeconfig ./admin.conf get nodes`
+5. Run a proxy from the client: `kubectl --kubeconfig ./admin.conf proxy`
+6. Access the api from local: `http://localhost:8001/api/v1`
+7. But it's best to use regular user credentials. See quote from the official site:
+*Note: ......
+*The admin.conf file gives the user superuser privileges over the cluster. This file should be used sparingly. For normal users, it's recommended to generate an unique credential to which you grant privileges. You can do this with the `kubeadm kubeconfig user --client-name` command. That command will print out a KubeConfig file to STDOUT which you should save to a file and distribute to your user. After that, grant privileges by using `kubectl create (cluster)rolebinding`.*
 
