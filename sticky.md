@@ -10,7 +10,8 @@ i. Host setup
 - This will be the master node.
 - Req: Win 10 Pro or NT?
 - In Bios, enable virtualization(method varies).
-- Enable the feature on Hyper Visor Manager, restart PC</br>
+- Enable the feature on Hyper Visor Manager, restart PC
+
 ii. VM
 - *External Switch* for the network adaptor
 - *Dynamic Memory* minimum set to 4GB
@@ -206,6 +207,7 @@ nodeRegistration:
 - [ ] kubectl drain for gracefule shutdown
 - [ ] investigate autoscaling mechanism
 - [ ] how node certificate redemption is handled?
+- [ ] about service account
 # Addendum
 ## I. Custom init config
 THESE WERE USED RIGHT BEFORE INIT</br>
@@ -258,12 +260,15 @@ kubeadm init \
 
 ## III. Node control
 1. To access the CP api from outside the cluster,
-2. Install kubectl on the client machine.
-3. From the client, `scp <cp-node-user-name>@<cp-host>:/etc/kubernetes/admin.conf .`
-4. Test it: `kubectl --kubeconfig ./admin.conf get nodes`
-5. Run a proxy from the client: `kubectl --kubeconfig ./admin.conf proxy`
-6. Access the api from local: `http://localhost:8001/api/v1`
-7. But it's best to use regular user credentials. See quote from the official site:
+2. Install kubectl on the client machine. *root login should be allowed* via sshd-config
+3. From the client, `scp root@<cp-host>:/etc/kubernetes/admin.conf .`
+4. Edit `/etc/hosts` file to include ip mapping (in this case, `192.168.0.8 master`). On windows, its located in `C:\Windows\System32\drivers\etc\hosts`
+5. Test it: `kubectl --kubeconfig ./admin.conf get nodes`
+6. Run a proxy from the client: `kubectl --kubeconfig ./admin.conf proxy`
+7. Access the api from local: `http://localhost:8001/api/v1`
+![alt text](image-1.png)
+8. But it's best to use regular user credentials. I'll continue this one the service account subject. 
+Also See quote from the official site:
 *Note: ......
 *The admin.conf file gives the user superuser privileges over the cluster. This file should be used sparingly. For normal users, it's recommended to generate an unique credential to which you grant privileges. You can do this with the `kubeadm kubeconfig user --client-name` command. That command will print out a KubeConfig file to STDOUT which you should save to a file and distribute to your user. After that, grant privileges by using `kubectl create (cluster)rolebinding`.*
 
