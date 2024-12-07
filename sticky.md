@@ -1,4 +1,11 @@
-# *WIP*
+*WIP*
+# Kubernetes in General
+I'm not an expert nor am I here to teach!</br>
+This doc, in its entirety, is to serve as a self-reminder!
+## Architecture
+![alt text](image-2.png)
+## ...
+# Experiments
 ## Environment
 - Master node: Ubuntu 24.04 server on Hyper-V on Windows 10 Pro
 - Worker node: Ubuntu 24.04 server on a baremetal, dedicated server
@@ -155,14 +162,25 @@ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 ### VI. Network plugin
+
+**<< RESTART HERE. WILL USE FLANNEL THIS TIME DUE TO METALLB ISSUE**
+
 `kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.29.0/manifests/tigera-operator.yaml`</br>
 then, </br>
+
 `wget https://raw.githubusercontent.com/projectcalico/calico/v3.29.0/manifests/custom-resources.yaml`</br>
 then,</br>
+
+`sudo curl -L https://github.com/projectcalico/calico/releases/download/v3.29.0/calicoctl-linux-amd64 -o /usr/local/bin/calicoctl`</br>
+
+`sudo chmod +x /usr/local/bin/calicoctl`</br>
+
 `nano custom-resources.yaml`</br>
 and edit line: </br>
+
 `cidr: 10.244.0.0/16`</br>
 confirm pods running:</br>
+
 `watch kubectl get pods -n calico-system`</br>
 "taint" nodes, which means to make a node available for pods</br>
 `kubectl taint nodes --all node-role.kubernetes.io/control-plane-`</br>
@@ -202,12 +220,192 @@ nodeRegistration:
 2. The syntax means to asign *'worker'* label to the nodes that have the *'role key'* of a name *'node-role.kubernetes.io/worker'*
 ---
 ## Ready to Deploy
-### Coming soon...
+But hold your horses...
+### I. Persistnet Volumes
+Build me a friggin castle</br>
+I'm not provisioning db as a service(doesn't have to be dynamic) so i'll just use local storage. I maybe digging my own grave but hey it's just a sandbox right?</br>
+<strong>i. Define a storage class:</strong></br>
+This is merely a definition of  provisioning method, not an actual volume: </br>
+
+`nano storageclass-local.yaml`</br>
+add:
+
+```yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+```
+
+then, `kubectl apply -f storageclass-local.yaml`</br>
+<strong>ii. Define persistent volume obejct:</strong></br>
+This is the actual resource definition. This specific PV will be used by a web server pod that has a Mongo DB instance in it:</br>
+
+`nano mongo-pv.yaml` then,
+
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mongo-pv
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  claimRef:
+    name: mongo-pvc
+    namespace: express-mongodb
+  local:
+    path: /lab/mnt/pvs/mongo
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - worker-01
+```
+
+then, `kubectl apply -f mongo-pv.yaml`</br>
+<strong>iii. Service namespace:</strong></br>
+It doesn't sit right to place it here but...:</br>
+
+`nano namespace-express-mongo.yaml` then, </br>
+
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: express-mongodb 
+# almost feels wrong that it's so short?
+```
+
+then, `kubectl apply -f namespace-express-mongo.yaml`</br>
+<strong>iv. Resource claim object:</strong></br>
+Pods will use this to request volume resources:</br>
+
+`nano mongo-pvc.yaml` then,</br>
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-pvc
+  namespace: express-mongodb
+spec:
+  storageClassName: local-storage
+  accessModes:
+    - ReadWriteOnce
+  volumeName: mongo-pv
+  resources:
+    requests:
+      storage: 5Gi
+```
+
+### II. Install Helm
+It's a package manager for K8S: </br>
+
+```bash
+wget https://get.helm.sh/helm-v3.16.3-linux-amd64.tar.gz
+tar -xvzf helm-v3.16.3-linux-amd64.tar.gz
+mv linux-amd64 helm # for readability
+echo "export PATH=$PATH:$(pwd)/helm" >> ~/.bashrc # I use _aliases for church and state reasons 
+source ~/.bashrc 
+# helm is ready
+```
+
+### III. Gateway
+Objective: Add a gateway for pods, make a deployment manifest, and expose via gateway using httproute</br>
+<strong>i. Baseline(?) Gateway API</strong></br>
+It adds the Gateway, HTTPRoute kinds and more</br>
+
+`kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.0/standard-install.yaml`
+<strong>ii. Gateway API Resources</strong></br> 
+The Custom Resource `Definition` or 'CRD'...</br>
+
+`kubectl kustomize "https://github.com/nginxinc/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v1.5.0" | kubectl apply -f -`
+<strong>iii. Gateway controller: This is the actual deployment</strong></br>
+
+`helm install --wait ngf oci://ghcr.io/nginxinc/charts/nginx-gateway-fabric --create-namespace -n nginx-gateway`
+</br>
+
+<strong>iv. MetalLB</strong></br>
+At this point, my `kubectl get svc nginx-gateway`, output showed that the external ip was 'pending'. It's bc my cluster is on baremetal, not a IaaS like AWS or GCP or Azure. MetalLB handles this.</br>
+![alt text](image-3.png)
+
+`sudo apt install iptables-persistent`
+
+`sudo iptables -A INPUT -p tcp --dport 7946 -j ACCEPT`</br>
+`sudo iptables -A INPUT -p udp --dport 7946 -j ACCEPT` then,</br>
+<< << << from here
+`kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml`</br>
+
+```bash
+calicoctl create -f - <<EOF
+apiVersion: projectcalico.org/v3
+kind: BGPConfiguration
+metadata:
+  name: default
+spec:
+  serviceLoadBalancerIPs:
+  - cidr: 10.244.0.0/16
+EOF
+```
+
+`kubectl delete daemonset speaker -n metallb-system`</br>
+
+This should let the LB work on my baremetal and It won't conflict with Calico</br>
+**This setup should be later varified because**</br>
+1. It uses layer 2 mode but disables speaker 
+
+<strong>v. Gateway and Routing</strong></br>
+
+`nano gateway.yaml`</br>
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: nginx-gateway
+  namespace: nginx-gateway
+spec:
+  type: LoadBalancer
+  gatewayClassName: nginx
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+```
+
+`kubectl apply -f gateway.yaml`</br>
+
+In `nano httproute.yaml`,</br>
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+
+```
+
+**Validate first** with `kubectl apply --validate='strict' -f xx.yaml`</br>
+
 ## TODOs
+### Pending
+- [ ] tainted love
 - [ ] kubectl drain for gracefule shutdown
 - [ ] investigate autoscaling mechanism
-- [ ] how node certificate redemption is handled?
 - [ ] about service account
+- [ ] object definition files(.yaml) management
+### Resolved
+- [x] how node certificate redemption is handled?: only used when joining
 # Addendum
 ## I. Custom init config
 THESE WERE USED RIGHT BEFORE INIT</br>
