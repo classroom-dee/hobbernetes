@@ -1,3 +1,29 @@
+<div align="center">
+
+![alt text](carrib.png)
+
+😁 The best, no doubt</br>
+</div>
+
+---
+
+### Table of Contents
+- [Kube In General](#kubernetes-in-general)
+  - [Resources](#resources)
+  - [Architecture](#architecture)
+- [Experiments](#experiments)
+  - [Environment](#environment)
+  - [Overview](#setup-overview)
+  - [The Backbone](#the-backbone)
+  - [Joining](#joining-a-node)
+  - [Deploying](#ready-to-deploy)
+- [Addendum](#addendum)
+  - [Todos](#todos)
+  - [Custom Init](#i-custom-init-config)
+  - [UFW Migration](#ii-migrating-ufw-rules)
+  - [Cluster Control](#iii-node-control)
+  - [Reset](#iv-resetting)
+
 *WIP*
 # Kubernetes in General
 I'm not an expert nor am I here to teach!</br>
@@ -279,13 +305,13 @@ nodeRegistration:
 <strong>i. Baseline(?) Gateway API</strong></br>
 It adds the Gateway, HTTPRoute kinds and more</br>
 
-`kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.0/standard-install.yaml`
+`kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.0/standard-install.yaml`</br>
 <strong>ii. Gateway API Resources</strong></br> 
 
-`kubectl kustomize "https://github.com/nginxinc/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v1.5.0" | kubectl apply -f -`
+`kubectl kustomize "https://github.com/nginxinc/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v1.5.0" | kubectl apply -f -`</br>
 <strong>iii. CRDs</strong></br>
 
-`kubectl apply -f https://raw.githubusercontent.com/nginxinc/nginx-gateway-fabric/v1.5.0/deploy/crds.yaml`
+`kubectl apply -f https://raw.githubusercontent.com/nginxinc/nginx-gateway-fabric/v1.5.0/deploy/crds.yaml`</br>
 <strong>iv. Gateway controller</strong></br>
 This is the actual controller deployment. Individual gateway resources are separate things!</br>
 
@@ -295,8 +321,10 @@ This is the actual controller deployment. Individual gateway resources are separ
 <strong>iv. MetalLB</strong></br>
 At this point, my `kubectl get svc nginx-gateway` output showed that the external ip was 'pending'.
 
+</br>It's bc my cluster is on baremetal, not a IaaS like AWS or GCP or Azure. `MetalLB` handles this.</br>
+
+Here's the MetalLB - CNI compat matrix. I use Flannel.</br>
 ![alt text](image-3.png)
-It's bc my cluster is on baremetal, not a IaaS like AWS or GCP or Azure. `MetalLB` handles this.</br>
 
 `kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml`</br>
 
@@ -335,7 +363,7 @@ But hold your horses...
 *You might need this for stateful things*</br>
 *Still working on provisioning local pv*</br>
 *This is a static local pv for DuckDB DW*</br>
-*It doesn't need a storageclass?*🙄</br>
+*It doesn't need a storageclass?* 🙄</br>
 **i. PersistentVolume and PersistentVolumeClaim**</br>
 ```yaml
 # nano duckdb-volume.yaml
@@ -447,8 +475,7 @@ spec:
 
 `sudo netfilter-persistent save`</br>
 
-
-![alt text](image-5.png)
+![alt text](image-6.png)
 
 Set portforwarding to the external IP</br>
 
@@ -468,20 +495,27 @@ I'll be hosting a webserver.</br>
 Refer to this page for multiple services on one gateway.</br>
 [Nginx official](https://docs.nginx.com/nginx-gateway-fabric/how-to/traffic-management/advanced-routing/)</br>
 
+# Addendum
+
 ## TODOs
+
 ### Pending
+
 - [ ] Wrap the chapters with toggles
-- [ ] kubectl drain for gracefule shutdown
-- [ ] investigate autoscaling mechanism
-- [ ] about service account
-- [ ] policies (Flannel can't handle it?)
-- [ ] object definition files(.yaml) management -> this would include cluster CI/CD
+- [ ] Web serving backend test
+- [ ] Airflow backend test
+- [ ] Spark Submit test
+- [ ] Bitnami Kafka
+- [ ] Kubectl drain for gracefule shutdown
+- [ ] Investigate autoscaling mechanism
+- [ ] About service account
+- [ ] Policies (Flannel can't handle it?)
+- [ ] Object definition files(.yaml) management -> this would include cluster CI/CD
 
 ### Resolved
 - [x] DW
-- [x] tainted love
-- [x] how node certificate redemption is handled?: only used when joining
-# Addendum
+- [x] Tainted love
+- [x] How node certificate redemption is handled?: only used when joining
 ## I. Custom init config
 THESE WERE USED RIGHT BEFORE INIT</br>
 vi.
@@ -536,16 +570,18 @@ kubeadm init \
 5. Test it: `kubectl --kubeconfig ./admin.conf get nodes`
 6. Run a proxy from the client: `kubectl --kubeconfig ./admin.conf proxy`
 7. Access the api from local: `http://localhost:8001/api/v1`
-![alt text](image-1.png)
 8. But it's best to use regular user credentials. I'll continue this on the service account subject. 
 Also See quote from the official site:
-*Note: ......
-*The admin.conf file gives the user superuser privileges over the cluster. This file should be used sparingly. For normal users, it's recommended to generate an unique credential to which you grant privileges. You can do this with the `kubeadm kubeconfig user --client-name` command. That command will print out a KubeConfig file to STDOUT which you should save to a file and distribute to your user. After that, grant privileges by using `kubectl create (cluster)rolebinding`.*
+</br>
+*The admin.conf file gives the user superuser privileges over the cluster. This file should be used sparingly. For normal users, it's recommended to generate an unique credential to which you grant privileges. You can do this with the `kubeadm kubeconfig user --client-name` command. That command will print out a KubeConfig file to STDOUT which you should save to a file and distribute to your user. After that, grant privileges by using `kubectl create (cluster)rolebinding`.* </br>
+
+![alt text](image-1.png)
 
 ## IV. Resetting
 - `sudo kubeadm reset`
-- follow instructions on what to delete
+- follow instructions on what to delete then,
 ```bash
+# I'm pretty sure -F -X will suffice?
 sudo iptables -F
 sudo iptables -t nat -F
 sudo iptables -t mangle -F
