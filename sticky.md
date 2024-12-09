@@ -2,6 +2,14 @@
 # Kubernetes in General
 I'm not an expert nor am I here to teach!</br>
 This doc, in its entirety, is to serve as a self-reminder!
+## Resources
+*This is not an exhaustive list*
+- Kubernetes core (Kubeadm)
+- Flannel
+- Nginx Gateway Fabric
+- MetalLB
+- PG DuckDB
+...
 ## Architecture
 ![alt text](image-2.png)
 ## ...
@@ -29,12 +37,14 @@ i. Host config</br>
 Get the network interface's ipv4 address of ALL NODES. Mines are 192.168.0.8 and 100.</br>
 `sudo vi /etc/hosts`</br>
 then, add:
+
 ```plaintext
 ...
 192.168.0.8 master
 192.168.0.100 worker-01
 ...
 ```
+
 ii. Firewalls</br>
 Disable the frontend firewall. For Redhat base OS, it's firewalld.</br>
 ```bash
@@ -42,9 +52,16 @@ sudo ufw disable
 sudo systemctl stop ufw
 sudo systemctl disable ufw
 sudo systemctl mask --now ufw
+
+sudo apt install iptables-persistent
+sudo iptables -A INPUT -p tcp --dport 7946 -j ACCEPT
+sudo iptables -A INPUT -p udp --dport 7946 -j ACCEPT
+sudo netfilter-persistent save
 ```
-then,
+then, </br>
+
 ```bash
+# allowing bridges
 cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
@@ -89,6 +106,7 @@ newgrp docker
 *CHECK YOUR OS COMPAT!!* Mine is Ubuntu 24.04 noble</br>
 Install Go lang : https://go.dev/doc/install</br>
 An excerpt from the Mirantis doc.</br>
+
 ```shell
 git clone https://github.com/Mirantis/cri-dockerd.git
 # ONCE DONE,
@@ -101,7 +119,9 @@ sudo sed -i -e 's,/usr/bin/cri-dockerd,/usr/local/bin/cri-dockerd,' /etc/systemd
 sudo systemctl daemon-reload
 sudo systemctl enable --now cri-docker.socket
 ```
+
 then, inside `sudo nano /etc/systemd/system/multi-user.target.wants/cri-docker.service` edit line,</br>
+
 ```yaml
 ExecStart=/usr/local/bin/cri-dockerd --container-runtime-endpoint fd:// --network-plugin=cni --pod-cidr=10.244.0.0/16
 ```
@@ -110,16 +130,20 @@ check `sudo nano /etc/crictl.yaml` if `runtime-endpoint` is set to `unix:///var/
 then finally, `sudo systemctl daemon-reload`</br>
 <strong>2. DO THIS ONLY IF `docker info | grep Cgroup` shows `cgroupfs`, not `systemd`</strong></br>
 In this file:(It could pre-exist or be empty)</br>
+
 `sudo nano /etc/docker/daemon.json`</br>
 add this code:</br>
+
 `{
   "exec-opts": ["native.cgroupdriver=systemd"]
 }`</br>
+
 then, execute:</br>
 `sudo systemctl restart docker`</br>
 and finally, </br>
 `sudo chmod 666 /var/run/cri-dockerd.sock`</br>
 ### V. Kubes
+
 ```bash
 # update repos
 sudo apt-get update
@@ -148,7 +172,7 @@ ii. `sudo systemctl start cri-docker`</br>
 iii. `sudo systemctl enable cri-docker`</br>
 iv. Switch to root for ease of use `sudo -i`</br>
 v. `sudo sed -i '/swap/d' /etc/fstab` and then *reboot*</br>
-vi. Init CP: Initially i was gonna use Flannel hence the cidr block but it doesn't matter now that i'm using Calico. Just be consistent.</br>
+vi. Init CP: will use Flannel, hence the cidr block.</br>
 ```bash
 sudo kubeadm init \
 --cri-socket unix:///var/run/cri-dockerd.sock \
@@ -163,41 +187,70 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 ### VI. Network plugin
 
-**<< RESTART HERE. WILL USE FLANNEL THIS TIME DUE TO METALLB ISSUE**
+<strong>i. Install cni binaries</strong></br>
 
-`kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.29.0/manifests/tigera-operator.yaml`</br>
-then, </br>
+```bash
+mkdir -p /opt/cni/bin
+# input your own arch!
+curl -O -L https://github.com/containernetworking/plugins/releases/download/v1.6.0/cni-plugins-linux-amd64-v1.6.0.tgz
+tar -C /opt/cni/bin -xzf cni-plugins-linux-amd64-v1.6.0.tgz
+```
+<strong>ii. Flannel</strong></br>
 
-`wget https://raw.githubusercontent.com/projectcalico/calico/v3.29.0/manifests/custom-resources.yaml`</br>
-then,</br>
+Enable br_netfilter: `sudo modprobe br_netfilter`</br>
+and make it persistent: ... if it doesn't work, use bashrc?
+edit: DO NOT USE BASHRC 😂
 
-`sudo curl -L https://github.com/projectcalico/calico/releases/download/v3.29.0/calicoctl-linux-amd64 -o /usr/local/bin/calicoctl`</br>
+```bash
+echo br_netfilter | sudo tee /etc/modules-load.d/modules.conf
+sudo sysctl --system
+```
 
-`sudo chmod +x /usr/local/bin/calicoctl`</br>
+`kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml`</br>
 
-`nano custom-resources.yaml`</br>
-and edit line: </br>
+<strong>iii. Confirm pods are running</strong></br>
 
-`cidr: 10.244.0.0/16`</br>
-confirm pods running:</br>
+`kubectl get pods -A`</br>
+if pod status is stuck at creation,</br>
+`sudo nano /run/flannel/subnet.env`, then
+```bash
+FLANNEL_NETWORK=10.244.0.0/16
+FLANNEL_SUBNET=10.244.0.1/24
+FLANNEL_MTU=1450
+FLANNEL_IPMASQ=true
+```
+<strong>iv. "taint" nodes</strong></br>
+Which means to make a node available for pods</br>
 
-`watch kubectl get pods -n calico-system`</br>
-"taint" nodes, which means to make a node available for pods</br>
 `kubectl taint nodes --all node-role.kubernetes.io/control-plane-`</br>
 confirm node exposure:</br>
 `kubectl get nodes -o wide`</br>
+I think this is a good place to `sudo netfilter-persistent save` once
 
 ## Joining a node
 ### I. Follow the above guide
 - Not to the tee though. Always crosscheck with your environment.
 - Follow up until you reach the `kubeadm init` part.
-### II. The token
+- **Enable br_netfilter**: `sudo modprobe br_netfilter`</br>
+### II. Install Helm
+**Airflow uses Helm**
+It's a package manager for K8S: </br>
+
+```bash
+wget https://get.helm.sh/helm-v3.16.3-linux-amd64.tar.gz
+tar -xvzf helm-v3.16.3-linux-amd64.tar.gz
+mv linux-amd64 helm # for readability
+echo "export PATH=$PATH:$(pwd)/helm" >> ~/.bashrc # I use _aliases for church and state reasons 
+source ~/.bashrc 
+# helm is ready
+```
+### III. The token
 1. <strong>FROM YOUR MASTER NODE</strong>, If you've been a good boi/gal and wrote down the token and hash, `skip 2. to 4`.
 2. If 24h hasn't passed since you have created the token: `sudo kubeadm token list` and write it down.
 3. If it's expired, `sudo kubeadm token create` and keep a memo.
 4. To get the hash, `sudo cat /etc/kubernetes/pki/ca.crt | openssl x509 -pubkey  | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'`
 5. <strong>FROM YOUR WORKER NODE</strong>, Join: </br>
-`sudo kubeadm join --token <token> <cp-host>:<cp-port> --discovery-token-ca-cert-hash sha256:<hash>`
+`sudo kubeadm join --token <token> <cp-host>:<cp-port> --discovery-token-ca-cert-hash sha256:<hash> --cri-socket unix:///var/run/cri-dockerd.sock`
 6. <strong>IF YOU GET THE multiple container runtime socket ERROR</strong> follow 7. ~ 8.
 7. `sudo nano pick-a-name.yaml` and then,
 ```yaml
@@ -213,198 +266,220 @@ nodeRegistration:
   criSocket: unix:///var/run/cri-dockerd.sock
 ```
 8. `sudo kubeadm join --config pick-a-name.yaml`
-9. Confirm that it has joined the mob: The cp has to propagate Calico and other things so be patient
+9. Confirm that it has joined the mob: The cp has to propagate things so be patient
 ![alt text](image.png)
-### III. Role
-1. Initially the worker node's role is labeled none. I'm still investigating if that's the default or not. But I went on to modifying it anyways: `kubectl label nodes <worker-name> node-role.kubernetes.io/worker=worker`</br>
+### IV. Role
+**Currently foregoing this step**
+1. Initially the worker node's role is labeled none. I'm still investigating if that's the default or not. But I went on to modifying it anyways:</br>
+`kubectl label nodes <worker-name> node-role.kubernetes.io/worker=worker`</br>
 2. The syntax means to asign *'worker'* label to the nodes that have the *'role key'* of a name *'node-role.kubernetes.io/worker'*
 ---
-## Ready to Deploy
-But hold your horses...
-### I. Persistnet Volumes
-Build me a friggin castle</br>
-I'm not provisioning db as a service(doesn't have to be dynamic) so i'll just use local storage. I maybe digging my own grave but hey it's just a sandbox right?</br>
-<strong>i. Define a storage class:</strong></br>
-This is merely a definition of  provisioning method, not an actual volume: </br>
 
-`nano storageclass-local.yaml`</br>
-add:
-
-```yaml
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: local-storage
-provisioner: kubernetes.io/no-provisioner
-volumeBindingMode: WaitForFirstConsumer
-```
-
-then, `kubectl apply -f storageclass-local.yaml`</br>
-<strong>ii. Define persistent volume obejct:</strong></br>
-This is the actual resource definition. This specific PV will be used by a web server pod that has a Mongo DB instance in it:</br>
-
-`nano mongo-pv.yaml` then,
-
-```yaml
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: mongo-pv
-spec:
-  capacity:
-    storage: 5Gi
-  volumeMode: Filesystem
-  accessModes:
-  - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Delete
-  storageClassName: local-storage
-  claimRef:
-    name: mongo-pvc
-    namespace: express-mongodb
-  local:
-    path: /lab/mnt/pvs/mongo
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: kubernetes.io/hostname
-          operator: In
-          values:
-          - worker-01
-```
-
-then, `kubectl apply -f mongo-pv.yaml`</br>
-<strong>iii. Service namespace:</strong></br>
-It doesn't sit right to place it here but...:</br>
-
-`nano namespace-express-mongo.yaml` then, </br>
-
-```yaml
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: express-mongodb 
-# almost feels wrong that it's so short?
-```
-
-then, `kubectl apply -f namespace-express-mongo.yaml`</br>
-<strong>iv. Resource claim object:</strong></br>
-Pods will use this to request volume resources:</br>
-
-`nano mongo-pvc.yaml` then,</br>
-
-```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mongo-pvc
-  namespace: express-mongodb
-spec:
-  storageClassName: local-storage
-  accessModes:
-    - ReadWriteOnce
-  volumeName: mongo-pv
-  resources:
-    requests:
-      storage: 5Gi
-```
-
-### II. Install Helm
-It's a package manager for K8S: </br>
-
-```bash
-wget https://get.helm.sh/helm-v3.16.3-linux-amd64.tar.gz
-tar -xvzf helm-v3.16.3-linux-amd64.tar.gz
-mv linux-amd64 helm # for readability
-echo "export PATH=$PATH:$(pwd)/helm" >> ~/.bashrc # I use _aliases for church and state reasons 
-source ~/.bashrc 
-# helm is ready
-```
-
-### III. Gateway
-Objective: Add a gateway for pods, make a deployment manifest, and expose via gateway using httproute</br>
+### V. Gateway Controller
 <strong>i. Baseline(?) Gateway API</strong></br>
 It adds the Gateway, HTTPRoute kinds and more</br>
 
 `kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.0/standard-install.yaml`
 <strong>ii. Gateway API Resources</strong></br> 
-The Custom Resource `Definition` or 'CRD'...</br>
 
 `kubectl kustomize "https://github.com/nginxinc/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v1.5.0" | kubectl apply -f -`
-<strong>iii. Gateway controller: This is the actual deployment</strong></br>
+<strong>iii. CRDs</strong></br>
 
-`helm install --wait ngf oci://ghcr.io/nginxinc/charts/nginx-gateway-fabric --create-namespace -n nginx-gateway`
+`kubectl apply -f https://raw.githubusercontent.com/nginxinc/nginx-gateway-fabric/v1.5.0/deploy/crds.yaml`
+<strong>iv. Gateway controller</strong></br>
+This is the actual controller deployment. Individual gateway resources are separate things!</br>
+
+`kubectl apply -f https://raw.githubusercontent.com/nginxinc/nginx-gateway-fabric/v1.5.0/deploy/default/deploy.yaml`
 </br>
 
 <strong>iv. MetalLB</strong></br>
-At this point, my `kubectl get svc nginx-gateway`, output showed that the external ip was 'pending'. It's bc my cluster is on baremetal, not a IaaS like AWS or GCP or Azure. MetalLB handles this.</br>
+At this point, my `kubectl get svc nginx-gateway` output showed that the external ip was 'pending'.
+
 ![alt text](image-3.png)
+It's bc my cluster is on baremetal, not a IaaS like AWS or GCP or Azure. `MetalLB` handles this.</br>
 
-`sudo apt install iptables-persistent`
-
-`sudo iptables -A INPUT -p tcp --dport 7946 -j ACCEPT`</br>
-`sudo iptables -A INPUT -p udp --dport 7946 -j ACCEPT` then,</br>
-<< << << from here
 `kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml`</br>
 
-```bash
-calicoctl create -f - <<EOF
-apiVersion: projectcalico.org/v3
-kind: BGPConfiguration
-metadata:
-  name: default
-spec:
-  serviceLoadBalancerIPs:
-  - cidr: 10.244.0.0/16
-EOF
-```
-
-`kubectl delete daemonset speaker -n metallb-system`</br>
-
-This should let the LB work on my baremetal and It won't conflict with Calico</br>
-**This setup should be later varified because**</br>
-1. It uses layer 2 mode but disables speaker 
-
-<strong>v. Gateway and Routing</strong></br>
-
-`nano gateway.yaml`</br>
+I'll use Layer 2 mode so I need eligible local addresses</br>
+To find this, I make an exclusion list</br>
+1. `ip pool` from the master node to determine the used CIDR: which was `192.168.0.8/24`
+2. On my router web UI, exclude DHCP range: which was `192.168.0.2 ~ 192.168.0.254`
+3. The subnet mask was manually set to `255.255.254.0`
+4. I can use `192.168.1.0/23`, specifically `192.168.1.2 ~ 192.168.1.254` since 0, 1, 255 are reserved.
+5. I also needed to uncap the local mask to `255.255.254.0`
 
 ```yaml
-apiVersion: gateway.networking.k8s.io/v1
-kind: Gateway
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
 metadata:
-  name: nginx-gateway
-  namespace: nginx-gateway
+  name: address-pool
+  namespace: metallb-system
 spec:
+  addresses:
+  - 192.168.1.2-192.168.1.100
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: l2advertisement
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+  - address-pool
+```
+then, `kubectl apply -f metallb-ippool.yaml`</br>
+
+## Ready to Deploy
+But hold your horses...
+### I. Persistnet Volumes
+*You might need this for stateful things*</br>
+*Still working on provisioning local pv*</br>
+*This is a static local pv for DuckDB DW*</br>
+*It doesn't need a storageclass?*🙄</br>
+**i. PersistentVolume and PersistentVolumeClaim**</br>
+```yaml
+# nano duckdb-volume.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: duckdb-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-storage
+  local:
+    path: /lab/mnt/pvs/duck
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - deeslab
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: duckdb-pvc
+spec:
+  storageClassName: local-storage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+```
+**ii. Apply**</br>
+`kubectl apply -f duckdb-volume.yaml`</br>
+then, see the Duckdb deployment section below</br>
+
+**iii. PV for Other Apps**</br>
+...Working on it</br>
+
+### II. Services Deployment
+
+**i. DuckDB deployment**</br>
+
+```yaml
+# duckdb-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: duckdb
+  labels:
+    app: duckdb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: duckdb
+  template:
+    metadata:
+      labels:
+        app: duckdb
+    spec:
+      containers:
+        - name: duckdb
+          image: pgduckdb/pgduckdb:17-v0.1.0
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_PASSWORD # YOU MUST CHOOSE NOW!
+              value: "<YOUR_PASSWORD>"
+            - name: POSTGRES_HOST_AUTH_METHOD
+              value: "md5"
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts: 
+            - name: duckdb-storage
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: duckdb-storage
+          persistentVolumeClaim:
+            claimName: duckdb-pvc
+```
+**ii. DuckDB Service**</br>
+
+```yaml
+# duckdb-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: duckdb-service
+  labels:
+    app: duckdb
+spec:
+  selector:
+    app: duckdb
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
   type: LoadBalancer
-  gatewayClassName: nginx
-  listeners:
-    - name: http
-      protocol: HTTP
-      port: 80
-```
-
-`kubectl apply -f gateway.yaml`</br>
-
-In `nano httproute.yaml`,</br>
-
-```yaml
-apiVersion: gateway.networking.k8s.io/v1beta1
-kind: HTTPRoute
-metadata:
 
 ```
+`kubectl apply -f duckdb-service.yaml`</br>
 
-**Validate first** with `kubectl apply --validate='strict' -f xx.yaml`</br>
+`sudo iptables -A INPUT -p tcp --dport 5432 -j ACCEPT`</br>
+
+`sudo netfilter-persistent save`</br>
+
+
+![alt text](image-5.png)
+
+Set portforwarding to the external IP</br>
+
+Check connection `psql -h 192.168.1.3 -p 5432 -U postgres`</br>
+
+Now I have my own DW 🍜</br>
+
+**iii. Other Apps**</br>
+
+For other apps, follow instructions,</br>
+Expose via gateway if necessary.</br>
+I'll be hosting a webserver.</br>
+... working on it << </br>
+
+<strong>vi. Gateway and Routing</strong></br>
+
+Refer to this page for multiple services on one gateway.</br>
+[Nginx official](https://docs.nginx.com/nginx-gateway-fabric/how-to/traffic-management/advanced-routing/)</br>
 
 ## TODOs
 ### Pending
-- [ ] tainted love
+- [ ] Wrap the chapters with toggles
 - [ ] kubectl drain for gracefule shutdown
 - [ ] investigate autoscaling mechanism
 - [ ] about service account
-- [ ] object definition files(.yaml) management
+- [ ] policies (Flannel can't handle it?)
+- [ ] object definition files(.yaml) management -> this would include cluster CI/CD
+
 ### Resolved
+- [x] DW
+- [x] tainted love
 - [x] how node certificate redemption is handled?: only used when joining
 # Addendum
 ## I. Custom init config
@@ -445,9 +520,6 @@ kubeadm init \
 # --dry-run \ # for testing
 --config "path/to/previously/made/new.yaml" \
 ```
-- On failure for some reason, fix the issue and `sudo kubeadm reset` and then do over
-- Set up kubelet, kubectl
-- Replicate the process on other node, this time with `join`
 
 ## II. Migrating UFW rules
 ### NO I DID NOT WANT TO DO IT PROGRAMMATICALLY 😣
@@ -465,8 +537,31 @@ kubeadm init \
 6. Run a proxy from the client: `kubectl --kubeconfig ./admin.conf proxy`
 7. Access the api from local: `http://localhost:8001/api/v1`
 ![alt text](image-1.png)
-8. But it's best to use regular user credentials. I'll continue this one the service account subject. 
+8. But it's best to use regular user credentials. I'll continue this on the service account subject. 
 Also See quote from the official site:
 *Note: ......
 *The admin.conf file gives the user superuser privileges over the cluster. This file should be used sparingly. For normal users, it's recommended to generate an unique credential to which you grant privileges. You can do this with the `kubeadm kubeconfig user --client-name` command. That command will print out a KubeConfig file to STDOUT which you should save to a file and distribute to your user. After that, grant privileges by using `kubectl create (cluster)rolebinding`.*
 
+## IV. Resetting
+- `sudo kubeadm reset`
+- follow instructions on what to delete
+```bash
+sudo iptables -F
+sudo iptables -t nat -F
+sudo iptables -t mangle -F
+sudo iptables -t raw -F
+sudo iptables -X
+sudo iptables -t nat -X
+sudo iptables -t mangle -X
+sudo iptables -t raw -X
+sudo iptables -P INPUT ACCEPT
+sudo iptables -P FORWARD ACCEPT
+sudo iptables -P OUTPUT ACCEPT
+sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+sudo iptables -A OUTPUT -p tcp --dport 22 -j ACCEPT
+sudo iptables -A INPUT -p udp --dport 9 -j ACCEPT
+sudo iptables -A OUTPUT -p udp --dport 9 -j ACCEPT
+sudo netfilter-persistent save
+# verify
+sudo iptables -L -v -n
+```
