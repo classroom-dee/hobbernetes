@@ -80,8 +80,14 @@ sudo systemctl disable ufw
 sudo systemctl mask --now ufw
 
 sudo apt install iptables-persistent
+# for MetalLB
 sudo iptables -A INPUT -p tcp --dport 7946 -j ACCEPT
 sudo iptables -A INPUT -p udp --dport 7946 -j ACCEPT
+
+# for DNS resolving
+sudo iptables -A INPUT -p udp --dport 53 -j ACCEPT
+sudo iptables -A OUTPUT -p udp --sport 53 -j ACCEPT
+
 sudo netfilter-persistent save
 ```
 then, </br>
@@ -330,11 +336,13 @@ Here's the MetalLB - CNI compat matrix. I use Flannel.</br>
 
 I'll use Layer 2 mode so I need eligible local addresses</br>
 To find this, I make an exclusion list</br>
+**I CHANGED BACK THE LAN SUBNET. THAT MESSED UP THE DNS RESOLUTION**
 1. `ip pool` from the master node to determine the used CIDR: which was `192.168.0.8/24`
-2. On my router web UI, exclude DHCP range: which was `192.168.0.2 ~ 192.168.0.254`
-3. The subnet mask was manually set to `255.255.254.0`
-4. I can use `192.168.1.0/23`, specifically `192.168.1.2 ~ 192.168.1.254` since 0, 1, 255 are reserved.
-5. I also needed to uncap the local mask to `255.255.254.0`
+2. On my router web UI, I adjusted the DHCP range from `192.168.0.2 ~ 192.168.0.254` to `192.168.0.2 ~ 192.168.0.100`
+3. ~~The subnet mask was manually set to `255.255.254.0`~~
+4. ~~I can use `192.168.1.0/23`, specifically `192.168.1.2 ~ 192.168.1.254` since 0, 1, 255 are reserved.~~
+5. ~~I also needed to uncap the local mask to `255.255.254.0`~~
+6. Use the rest of the range `192.168.0.101 ~ 192.168.0.254` for MetalLB IPPool
 
 ```yaml
 apiVersion: metallb.io/v1beta1
@@ -344,7 +352,7 @@ metadata:
   namespace: metallb-system
 spec:
   addresses:
-  - 192.168.1.2-192.168.1.100
+  - 192.168.0.101-192.168.0.254
 ---
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement
@@ -361,7 +369,6 @@ then, `kubectl apply -f metallb-ippool.yaml`</br>
 But hold your horses...
 ### I. Persistnet Volumes
 *You might need this for stateful things*</br>
-*Still working on provisioning local pv*</br>
 *This is a static local pv for DuckDB DW*</br>
 *It doesn't need a storageclass?* 🙄</br>
 **i. PersistentVolume and PersistentVolumeClaim**</br>
@@ -407,7 +414,64 @@ then, see the Duckdb deployment section below</br>
 **iii. PV for Other Apps**</br>
 ...Working on it</br>
 
-### II. Services Deployment
+### II. Service Account
+<<
+I'll demonstrate by making an account for spark-submit</br>
+**i. YAMLs**</br>
+
+SA
+
+```yaml
+# OR the SA resource is already there if you've installed spark via helm
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: spark-submit-sa
+  namespace: default
+```
+
+Role & binding for the SA
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  namespace: default
+  name: spark-submit-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/log", "services"]
+  verbs: ["get", "list", "create", "delete", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: spark-submit-binding
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: my-release-spark # this is included in bitnami's spark
+  namespace: default
+roleRef:
+  kind: Role
+  name: spark-submit-role
+  apiGroup: rbac.authorization.k8s.io
+```
+then,
+
+```bash
+# copy the output
+kubectl create token my-release-spark -n default
+# then,
+kubectl -n default get secret \ 
+  $(kubectl \ 
+    -n default get sa my-release-spark \ 
+    -o jsonpath="{.secrets[0].name}") \ 
+    -o jsonpath="{.data['ca\.crt']}" | base64 -d > ca.crt
+# produces ca.crt in the curr dir
+```
+
+### III. Services Deployment
 
 **i. DuckDB deployment**</br>
 
@@ -485,6 +549,126 @@ Now I have my own DW 🍜</br>
 
 **iii. Other Apps**</br>
 
+<details>
+  <summary>Spark</summary>
+
+  a. Some prereqs </br>
+
+  `helm install my-release oci://registry-1.docker.io/bitnamicharts/spark`</br>
+  `sudo apt install socat` in all nodes.</br>
+  
+  b. Spark master WebUI URL
+  
+  ```bash
+  # You'll have to detach the process or open a new terminal to use CLI while browsing
+  sudo kubectl port-forward \
+    --namespace default \
+    --address 0.0.0.0 \
+    svc/my-release-spark-master-svc 7077:80
+  ```
+  then, visit `http://192.168.0.8:7077` which is my kube apiserver ip</br>
+
+  c. Submitting ex-cluster</br>
+
+  << This is what's not working
+
+  ```bash
+  # class is unnecessary if executed from a python env
+  # this needs auth-ed kubectl on node in question, that means: copying admin.conf from master to worker and that's not easy...
+  # and it makes sense in practice to have the submitting-entity to have roles in a RBAC enviroment such as this.
+  # TL;DR, it's already laid out for ya so what's the struggle?
+  # SO LET'S NOT SUBMIT FROM OUTSIDE CLUSTER
+  spark-submit \ 
+    --conf spark.kubernetes.container.image=bitnami/spark:3 \ 
+    --master k8s://https://192.168.0.8:6443 \ 
+    --conf spark.kubernetes.driverEnv.SPARK_MASTER_URL=spark://10.244.1.68:7077 \ 
+    --conf spark.kubernetes.file.upload.path=file:///tmp \ 
+    --deploy-mode cluster \ 
+    /lab/dee/devcourse/hadoop_spark/cluster_test.py
+  # Nevertheless I was able to draw some important discovories from this:
+  # 1. the mount path for the image is /tmp
+  # 2. spark-submit demands the py file have pyspark related lines well duh🤣
+  # 3. here's another approach for accessing the driver node from the outside:
+  kubectl edit svc my-release-spark-master-svc
+  # 3-1. then, change the type under the spec section to
+  type: LoadBalancer
+  # 3-2. check that one is assigned an ip. I was assigned an 103
+  kubectl get svc
+  # 3-3. use the exposed ip. I still tripped up about the resolving mechanism of the k8s://https:// part
+  spark-submit \ 
+    --master k8s://https://192.168.0.103:7077 \ 
+    --deploy-mode cluster \ 
+    --conf spark.kubernetes.container.image=bitnami/spark:3 \ 
+    --conf spark.kubernetes.file.upload.path=file:///tmp \ 
+    /lab/dee/devcourse/hadoop_spark/cluster_test.py
+  ```
+
+  d. Submitting from a member node</br>
+
+  ```bash
+    # this has not been tested on my cluster
+    # this is for Java apps. need to test it with a py
+    export EXAMPLE_JAR=$(kubectl exec -ti --namespace default my-release-spark-worker-0 -- find examples/jars/ -name 'spark-example*\.jar' | tr -d '\r')
+
+    kubectl exec -ti --namespace default my-release-spark-worker-0 -- spark-submit --master spark://my-release-spark-master-svc:7077 \
+      --class org.apache.spark.examples.SparkPi \
+      $EXAMPLE_JAR 5
+  ```
+  e. Quotes from bitnami repo</br>
+  ** IMPORTANT: When submit an application from outside the cluster service type should be set to the NodePort or LoadBalancer. **</br>
+  ** IMPORTANT: When submit an application the --master parameter should be set to the service IP, if not, the application will not resolve the master. **</br>
+  WARNING: There are "resources" sections in the chart not set. Using "resourcesPreset" is not recommended for production. For production installations, please set the following values according to your workload needs:</br>
+  - master.resources
+  - worker.resources
+  +info https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+</details>
+
+<details>
+<summary>MinIO</summary>
+**First I need some minor deps**
+yq: https://github.com/mikefarah/yq/#install
+and jq (this was present)
+
+**Second I need a certificate auth(CA)**
+cfssl: https://github.com/cloudflare/cfssl/releases
+essentially, a signing tool.
+Had to scp my key from worker to master. (for git clone...)
+and then check,
+
+```bash
+# find the system pod name
+kubectl get pods -n kube-system
+# then, 
+kubectl get pod kube-controller-manager-$CLUSTERNAME -n kube-system -o yaml
+```
+these lines must exist:
+
+```bash
+- --cluster-signing-cert-file=/etc/kubernetes/pki/ca.crt
+- --cluster-signing-key-file=/etc/kubernetes/pki/ca.key
+```
+
+then, follow the installation section under this page. As it says, do not use kustomize later.
+https://min.io/docs/minio/kubernetes/upstream/operations/install-deploy-manage/deploy-operator-helm.html#id3
+
+That was the operator. Now I need 'tenants' as pods:
+https://min.io/docs/minio/kubernetes/upstream/operations/install-deploy-manage/deploy-minio-tenant-helm.html#deploy-tenant-helm
+made a storageclass and a pv, labeled a worker node like so `kubectl label nodes deeslab worker=one`,
+and set the pod config(values.yaml). nodeSelector gets the `worker: one` value. uncomment the storageclass section.
+also added LB option for exposure and...
+
+![alt text](image-7.png)
+voila
+
+woa minIO pre-allocates 2GB mem per tenant? Is it cuz of RDMA?
+It recommends DAS rather than NAS
+Also it seems to default to 2 parities. I'm not familiar with some of the terms. See below.
+![alt text](image-5.png)
+After some contemplation... here i come EPYC...? and goodbye my wallet?
+
+Misc. K8S TLS API: https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/
+</details>
+
 For other apps, follow instructions,</br>
 Expose via gateway if necessary.</br>
 I'll be hosting a webserver.</br>
@@ -504,11 +688,11 @@ Refer to this page for multiple services on one gateway.</br>
 - [ ] Wrap the chapters with toggles
 - [ ] Web serving backend test
 - [ ] Airflow backend test
-- [ ] Spark Submit test
+- [x] Spark Submit test
 - [ ] Bitnami Kafka
 - [ ] Kubectl drain for gracefule shutdown
 - [ ] Investigate autoscaling mechanism
-- [ ] About service account
+- [x] About service account
 - [ ] Policies (Flannel can't handle it?)
 - [ ] Object definition files(.yaml) management -> this would include cluster CI/CD
 
