@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-http
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-http
+  template:
+    metadata:
+      labels:
+        app: simple-http
+    spec:
+      containers:
+        - name: simple-http
+          image: xuanminator/simple-http:1.1
+          env:
+            - name: PORT
+              value: "8060"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
