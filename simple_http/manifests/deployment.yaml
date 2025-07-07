@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
         - name: simple-http
-          image: xuanminator/simple-http:1.1
+          image: xuanminator/simple-http:1.5
+          imagePullPolicy: Always
           env:
             - name: PORT
               value: "8060"
