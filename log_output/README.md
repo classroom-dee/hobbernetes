@@ -1,4 +1,7 @@
 ## Log Output
 ### Usage
-- ~~Deploy with `kubectl create deployment log-output --image=xuanminator/log_output:1.1`~~
-- Deploy with `kubectl apply -f https://raw.githubusercontent.com/boolYikes/hobbernetes/1.3/log_output/manifests/deployment.yaml`
+1. Deploy
+   - `kubectl apply -f https://raw.githubusercontent.com/boolYikes/hobbernetes/1.7/log_output/manifests/deployment.yaml`
+   - `kubectl apply -f https://raw.githubusercontent.com/boolYikes/hobbernetes/1.7/log_output/manifests/service.yaml`
+   - `kubectl apply -f https://raw.githubusercontent.com/boolYikes/hobbernetes/1.7/log_output/manifests/ingress.yaml`
+2. Access it via `http://localhost:8081`

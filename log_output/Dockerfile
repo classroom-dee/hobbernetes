@@ -1,11 +1,9 @@
-FROM alpine:latest
-
-RUN apk add --no-cache bash tzdata coreutils
-
-ENV TZ=UTC
+FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY logger.sh .
+COPY logger.py .
 
-ENTRYPOINT [ "./logger.sh" ]
+EXPOSE 8088
+
+CMD ["python", "logger.py"]
