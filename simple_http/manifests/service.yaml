@@ -7,13 +7,23 @@ apiVersion: v1
 kind: Service
 metadata:
   name: simple-http-svc
+# for ingress
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: simple-http
   ports:
-  - name: http
-    nodePort : 30080 # exposed port
+  - port: 2345
     protocol: TCP
-    port: 1234 # cluster internal port
-    targetPort: 8060 # application port
+    targetPort: 8060
+# for nodeport dev
+# spec:
+#   type: NodePort
+#   selector:
+#     app: simple-http
+#   ports:
+#   - name: http
+#     nodePort : 30080 # exposed port
+#     protocol: TCP
+#     port: 1234 # cluster internal port
+#     targetPort: 8060 # application port

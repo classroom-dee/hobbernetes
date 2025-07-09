@@ -6,3 +6,5 @@
 - [1.4. The project, step 2](https://github.com/boolYikes/hobbernetes/tree/1.4/simple_http)
 - [1.5. The project, step 3](https://github.com/boolYikes/hobbernetes/tree/1.5/simple_http)
 - [1.6. The project, step 4](https://github.com/boolYikes/hobbernetes/tree/1.6/simple_http)
+- [1.7. External access with Ingress](https://github.com/boolYikes/hobbernetes/tree/1.7/log_output)
+- [1.8. The project, step 5](https://github.com/boolYikes/hobbernetes/tree/1.8/simple_http)
