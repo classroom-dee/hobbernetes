@@ -1,1 +1,7 @@
 *.json
+**/target/
+Cargo.lock
+**/*.rs.bk
+**/tests/output/
+**/target/debug/
+**/target/release

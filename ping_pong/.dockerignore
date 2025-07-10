@@ -1,0 +1,5 @@
+target/release
+manifests/
+Dockerfile
+*.lock
+README.md
