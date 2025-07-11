@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: log-output
+  name: log-output-dep
 spec:
   replicas: 1
   selector:
@@ -12,10 +12,31 @@ spec:
       labels:
         app: log-output
     spec:
+      volumes:
+        - name: shared-log
+          emptyDir: {}
       containers:
-        - name: log-output
-          image: xuanminator/log_output:1.7
+        # logger
+        - name: log-output-logger
+          image: xuanminator/log_output_logger:1.10
           imagePullPolicy: Always
+          volumeMounts:
+          - name: shared-log
+            mountPath: /tmp/logs
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+        # fetcher
+        - name: log-output-fetcher
+          image: xuanminator/log_output_fetcher:1.10
+          imagePullPolicy: Always
+          volumeMounts:
+          - name: shared-log
+            mountPath: /tmp/logs
           resources:
             requests:
               cpu: "100m"
