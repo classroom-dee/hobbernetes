@@ -9,4 +9,4 @@
 - [1.7. External access with Ingress](https://github.com/boolYikes/hobbernetes/tree/1.7/log_output)
 - [1.8. The project, step 5](https://github.com/boolYikes/hobbernetes/tree/1.8/simple_http)
 - [1.9. More services](https://github.com/boolYikes/hobbernetes/tree/1.9/ping_pong)
-- [1.10. Even more services](https://github.com/boolYikes/hobbernetes/tree/1.10/log_ouput)
+- [1.10. Even more services](https://github.com/boolYikes/hobbernetes/tree/1.10/log_output)
