@@ -1,0 +1,12 @@
+# The pods seem to share this without problem...?
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-1-11
+spec:
+  storageClassName: pv-1-11-storage-class
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi

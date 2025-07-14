@@ -12,10 +12,17 @@ spec:
       labels:
         app: ping-pong
     spec:
+      volumes:
+        - name: shared-log
+          persistentVolumeClaim:
+            claimName: pvc-1-11
       containers:
         - name: ping-pong
-          image: xuanminator/ping-pong:1.9
+          image: xuanminator/ping-pong:1.11
           imagePullPolicy: Always
+          volumeMounts:
+          - name: shared-log
+            mountPath: /tmp/logs
           resources:
             requests:
               cpu: "100m"
