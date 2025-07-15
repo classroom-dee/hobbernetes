@@ -12,10 +12,17 @@ spec:
       labels:
         app: simple-http
     spec:
+      volumes:
+        - name: simple-http-volume
+          persistentVolumeClaim:
+            claimName: simple-http-pvc-1-12
       containers:
         - name: simple-http
-          image: xuanminator/simple-http:1.5
+          image: xuanminator/simple-http:1.12
           imagePullPolicy: Always
+          volumeMounts:
+          - name: simple-http-volume
+            mountPath: /tmp/simple-http
           env:
             - name: PORT
               value: "8060"

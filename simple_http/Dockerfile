@@ -1,9 +1,9 @@
-FROM alpine:latest
+FROM python:3.11-slim
 
-RUN apk add --no-cache netcat-openbsd
+WORKDIR /app
 
-COPY server.sh /server.sh
-COPY index.html /index.html
-RUN chmod +x /server.sh
+COPY server.py .
 
-CMD ["/server.sh"]
+EXPOSE 8060
+
+CMD ["python", "server.py"]
