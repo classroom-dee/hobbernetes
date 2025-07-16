@@ -15,10 +15,10 @@ spec:
       volumes:
         - name: simple-http-volume
           persistentVolumeClaim:
-            claimName: simple-http-pvc-1-12
+            claimName: simple-http-pvc-1-13
       containers:
         - name: simple-http
-          image: xuanminator/simple-http:1.12
+          image: xuanminator/simple-http:1.13
           imagePullPolicy: Always
           volumeMounts:
           - name: simple-http-volume

@@ -12,3 +12,4 @@
 - [1.10. Even more services](https://github.com/boolYikes/hobbernetes/tree/1.10/log_output)
 - [1.11. Persisting data](https://github.com/boolYikes/hobbernetes/tree/1.11/volume_related)
 - [1.12. The project, step 6](https://github.com/boolYikes/hobbernetes/tree/1.12/simple_http)
+- [1.13. The project, step 7](https://github.com/boolYikes/hobbernetes/tree/1.13/simple_http)
