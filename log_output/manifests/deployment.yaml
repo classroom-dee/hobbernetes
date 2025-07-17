@@ -33,7 +33,7 @@ spec:
               memory: "128Mi"
         # fetcher
         - name: log-output-fetcher
-          image: xuanminator/log_output_fetcher:1.11
+          image: xuanminator/log_output_fetcher:2.1
           imagePullPolicy: Always
           volumeMounts:
           - name: shared-log

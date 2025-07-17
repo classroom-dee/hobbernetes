@@ -3,8 +3,10 @@ use axum::{
     routing::get,
     Router,
     serve,
+    Json
 };
 use serde::{Serialize, Deserialize};
+use serde_json::json;
 use std::{
     fs::{OpenOptions},
     io::{BufReader, BufWriter},
@@ -26,11 +28,15 @@ async fn main() {
     let log_lock = Arc::new(Mutex::new(()));
 
     let app = Router::new()
-        .route("/", get(handler))
+        .route("/", get(handler)) // not needed?
         .route("/pingpong", get({
             let counter = Arc::clone(&counter);
             let log_lock = Arc::clone(&log_lock);
             move || ping_logger(Arc::clone(&counter), Arc::clone(&log_lock))
+        }))
+        .route("/pings", get({
+            let counter = Arc::clone(&counter);
+            move || get_pings(counter)
         }))
         .layer(ServiceBuilder::new().layer(Extension(counter)));
 
@@ -43,6 +49,11 @@ async fn handler(
 ) -> String {
     let count = counter.fetch_add(1, Ordering::SeqCst) + 1;
     format!("Pong {}", count)
+}
+
+async fn get_pings(counter: Arc<AtomicUsize>) -> Json<serde_json::Value> {
+    let count = counter.load(Ordering::Relaxed);
+    Json(json!({ "count": count }))
 }
 
 async fn ping_logger(

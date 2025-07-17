@@ -18,7 +18,7 @@ spec:
             claimName: pvc-1-11
       containers:
         - name: ping-pong
-          image: xuanminator/ping-pong:1.11
+          image: xuanminator/ping-pong:2.1
           imagePullPolicy: Always
           volumeMounts:
           - name: shared-log

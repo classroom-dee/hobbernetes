@@ -1,4 +1,5 @@
 import json
+import requests
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from helper import load_logs, ping_log, get_pings
 
@@ -20,19 +21,33 @@ class LogsReqHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(response) # or use byte string for plaintext
         elif self.path == '/logs/ping':
-            ping_count = len(get_pings())
-            log = ping_log('INFO', f'Counts: {ping_count}')
-            response = f'{log}\nPing / Pongs: {ping_count}'
+            # ping_count = len(get_pings()) # File-based method
+            ping_count = 0
+            try:
+                resp = requests.get('http://ping-pong-svc:2345/pings')
+                data = resp.json() # { count: n }
+                ping_count = data.get("count", 0)
 
-            self.send_response(200)
-            self.end_headers()
-            self.wfile.write(response.encode('utf-8'))
+                log = ping_log('INFO', f'Counts: {ping_count}')
+                response = f'{log}\nPing / Pongs: {ping_count}'
+
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(response.encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'text/plain')
+                self.end_headers()
+                self.wfile.write(f'Error: {e}'.encode())
         else:
             self.send_response(404)
             self.end_headers()
             self.wfile.write(b'Not found')
 
-if __name__ == "__main__":
+def run():
     server = ThreadingHTTPServer(("0.0.0.0", 8088), LogsReqHandler)
     print("Listening on port 8088")
     server.serve_forever()
+
+if __name__ == "__main__":
+    run()
