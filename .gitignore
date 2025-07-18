@@ -5,3 +5,4 @@ Cargo.lock
 **/tests/output/
 **/target/debug/
 **/target/release
+.venv

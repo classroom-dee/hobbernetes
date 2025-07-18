@@ -17,3 +17,4 @@
 - Summary
 ## Chapter 03
 - [2.1. Connecting pods](https://github.com/boolYikes/hobbernetes/tree/2.1/log_output)
+- [2.2. The projecct, step 8](https://github.com/boolYikes/hobbernetes/tree/2.2/simple_http)

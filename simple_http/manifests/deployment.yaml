@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: simple-http
+  name: simple-http-dep
 spec:
   replicas: 1
   selector:
@@ -17,15 +17,31 @@ spec:
           persistentVolumeClaim:
             claimName: simple-http-pvc-1-13
       containers:
-        - name: simple-http
-          image: xuanminator/simple-http:1.13
+        # static server
+        - name: simple-http-static
+          image: xuanminator/simple-http:2.2-static
           imagePullPolicy: Always
+          ports:
+          - containerPort: 8060
           volumeMounts:
           - name: simple-http-volume
             mountPath: /tmp/simple-http
-          env:
-            - name: PORT
-              value: "8060"
+          # env:
+          #   - name: PORT
+          #     value: "8060"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+        # api server
+        - name: simple-http-api
+          image: xuanminator/simple-http:2.2-api
+          imagePullPolicy: Always
+          ports:
+          - containerPort: 8061
           resources:
             requests:
               cpu: "100m"
