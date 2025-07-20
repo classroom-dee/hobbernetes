@@ -19,3 +19,4 @@
 - [2.1. Connecting pods](https://github.com/boolYikes/hobbernetes/tree/2.1/log_output)
 - [2.2. The projecct, step 8](https://github.com/boolYikes/hobbernetes/tree/2.2/simple_http)
 - [2.3. Keep them separated](https://github.com/boolYikes/hobbernetes/tree/2.3/log_output)
+- [2.4. The project, step 9](https://github.com/boolYikes/hobbernetes/tree/2.4/simple_http)

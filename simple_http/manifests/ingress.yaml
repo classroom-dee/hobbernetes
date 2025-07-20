@@ -4,6 +4,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  namespace: project
   name: simple-http-ingress
 spec:
   rules:

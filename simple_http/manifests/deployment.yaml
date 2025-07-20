@@ -1,6 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: project
   name: simple-http-dep
 spec:
   replicas: 1
@@ -9,13 +10,14 @@ spec:
       app: simple-http
   template:
     metadata:
+      namespace: project
       labels:
         app: simple-http
     spec:
       volumes:
         - name: simple-http-volume
           persistentVolumeClaim:
-            claimName: simple-http-pvc-1-13
+            claimName: simple-http-pvc-2-4
       containers:
         # static server
         - name: simple-http-static
