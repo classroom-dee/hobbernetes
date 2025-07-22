@@ -18,14 +18,25 @@ spec:
         - name: shared-log
           persistentVolumeClaim:
             claimName: pvc-1-11
+        - name: config-volume
+          configMap:
+            name: log-output-configmap-2-5
       containers:
         # logger
         - name: log-output-logger
-          image: xuanminator/log_output_logger:1.11
+          image: xuanminator/log_output_logger:2.5
           imagePullPolicy: Always
+          env:
+            - name: MESSAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: log-output-configmap-2-5
+                  key: MESSAGE
           volumeMounts:
           - name: shared-log
             mountPath: /tmp/logs
+          - name: config-volume
+            mountPath: /tmp/config
           resources:
             requests:
               cpu: "100m"
@@ -35,11 +46,19 @@ spec:
               memory: "128Mi"
         # fetcher
         - name: log-output-fetcher
-          image: xuanminator/log_output_fetcher:2.1
+          image: xuanminator/log_output_fetcher:2.5
           imagePullPolicy: Always
+          env:
+            - name: MESSAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: log-output-configmap-2-5
+                  key: MESSAGE
           volumeMounts:
           - name: shared-log
             mountPath: /tmp/logs
+          - name: config-volume
+            mountPath: /tmp/config
           resources:
             requests:
               cpu: "100m"

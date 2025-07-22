@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: exercises
+  name: log-output-configmap-2-5
+data:
+  information.txt: |
+    info text
+  MESSAGE: hullo world
