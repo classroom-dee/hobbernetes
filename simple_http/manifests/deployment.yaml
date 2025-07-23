@@ -19,18 +19,41 @@ spec:
           persistentVolumeClaim:
             claimName: simple-http-pvc-2-4
       containers:
-        # static server
+        # Container for the static server
         - name: simple-http-static
-          image: xuanminator/simple-http:2.2-static
+          image: xuanminator/simple-http:2.6-static
           imagePullPolicy: Always
-          ports:
-          - containerPort: 8060
+          env:
+          - name: STATIC_CACHE_DIR # this is passed to the container
+            valueFrom:
+              secretKeyRef:
+                name: simple-http-secrets
+                key: STATIC_CACHE_DIR
+          - name: STATIC_CACHE_EXPIRY
+            valueFrom:
+              secretKeyRef:
+                name: simple-http-secrets
+                key: STATIC_CACHE_EXPIRY
+          - name: STATIC_BASE_URL
+            valueFrom:
+              secretKeyRef:
+                name: simple-http-secrets
+                key: STATIC_BASE_URL
+          - name: STATIC_TARGET_ID
+            valueFrom:
+              secretKeyRef:
+                name: simple-http-secrets
+                key: STATIC_TARGET_ID
+          - name: STATIC_PORT
+            valueFrom:
+              secretKeyRef:
+                name: simple-http-secrets
+                key: STATIC_PORT
+          # ports:
+          # - containerPort: 8060
           volumeMounts:
           - name: simple-http-volume
             mountPath: /tmp/simple-http
-          # env:
-          #   - name: PORT
-          #     value: "8060"
           resources:
             requests:
               cpu: "100m"
@@ -38,12 +61,23 @@ spec:
             limits:
               cpu: "200m"
               memory: "128Mi"
-        # api server
+        # Container for the api server
         - name: simple-http-api
-          image: xuanminator/simple-http:2.2-api
+          image: xuanminator/simple-http:2.6-api
           imagePullPolicy: Always
-          ports:
-          - containerPort: 8061
+          env:
+          - name: API_URI
+            valueFrom:
+              secretKeyRef:
+                name: simple-http-secrets
+                key: API_URI
+          - name: API_PORT
+            valueFrom:
+              secretKeyRef:
+                name: simple-http-secrets
+                key: API_PORT
+          # ports:
+          # - containerPort: 8061
           resources:
             requests:
               cpu: "100m"

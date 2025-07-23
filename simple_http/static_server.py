@@ -1,10 +1,14 @@
-import os, time, base64, urllib.request
+import os, sys, time, urllib.request
 from flask import Flask, Response
+import base64
 
-CACHE_DIR    = "/tmp/simple-http"
-CACHE_EXPIRY = 600
-BASE_URL     = "https://picsum.photos/"
-target_id    = 100
+# raw = os.environ.get("STATIC_CACHE_DIR")
+# print(f"DEBUG STATIC_CACHE_DIR: {repr(raw)}", file=sys.stderr, flush=True)
+CACHE_DIR    = os.environ.get("STATIC_CACHE_DIR")
+CACHE_EXPIRY = int(os.environ.get("STATIC_CACHE_EXPIRY"))
+BASE_URL     = os.environ.get("STATIC_BASE_URL")
+target_id    = int(os.environ.get("STATIC_TARGET_ID"))
+PORT         = int(os.environ.get("STATIC_PORT"))
 cache_meta   = {}
 
 os.makedirs(CACHE_DIR, exist_ok=True)
@@ -72,4 +76,4 @@ def index():
     return Response(html, mimetype="text/html")
 
 if __name__ == "__main__":
-    app.run(port=8060, host='0.0.0.0', debug=True) # I do this from remote so 0.0.0.0 was necessary.
+    app.run(port=PORT, host='0.0.0.0', debug=True) # I do this from remote so 0.0.0.0 was necessary.

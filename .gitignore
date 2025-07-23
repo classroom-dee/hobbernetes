@@ -6,3 +6,4 @@ Cargo.lock
 **/target/debug/
 **/target/release
 .venv
+**/key.txt
