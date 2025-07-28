@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-stset
+spec:
+  serviceName: redis-svc
+  replicas: 2
+  selector:
+    matchLabels:
+      app: redisapp
+  template:
+    metadata:
+      labels:
+        app: redisapp
+    spec:
+      containers:
+        - name: redisfiller
+          image: jakousa/dwk-app5:54203329200143875187753026f4e93a1305ae26
+        - name: redis
+          image: redis:7
+          ports:
+            - name: web
+              containerPort: 6379
+          volumeMounts:
+            - name: redis-data-storage
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-data-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 100Mi
