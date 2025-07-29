@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: exercises
+  name: ping-pong-stset
+spec:
+  serviceName: ping-pong-pg-svc # must match the headless svc
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ping-pong
+  template:
+    metadata:
+      labels:
+        app: ping-pong
+    spec:
+      containers:
+        - name: ping-pong
+          image: xuanminator/ping-pong:2.7
+          imagePullPolicy: Always
+          ports:
+            - name: ping
+              containerPort: 8089
+          env:
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  key: user
+                  name: ping-pong-db-secret
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: ping-pong-db-secret
+        - name: postgres
+          image: postgres:13
+          ports:
+            - name: postgres
+              containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  key: user
+                  name: ping-pong-db-secret
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: ping-pong-db-secret
+          volumeMounts:
+            - name: ping-pong-pg-data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: ping-pong-pg-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 100Mi
