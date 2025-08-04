@@ -52,7 +52,7 @@ def index():
           const res  = await fetch(API);
           const data = await res.json();
           document.getElementById('list').innerHTML =
-            data.map(t => `<li>${{t}}</li>`).join('');
+            data.map(t => `<li>${{t.item}}</li>`).join('');
         }}
 
         document.getElementById('todoForm').addEventListener('submit', async e => {{

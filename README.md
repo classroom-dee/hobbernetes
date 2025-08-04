@@ -23,3 +23,4 @@
 - [2.5. Documentation and ConfigMaps](https://github.com/boolYikes/hobbernetes/tree/2.5/log_output)
 - [2.6. The project, step 10](https://github.com/boolYikes/hobbernetes/tree/2.6/simple_http)
 - [2.7. Stateful applications](https://github.com/boolYikes/hobbernetes/tree/2.7/ping_pong)
+- [2.8. The project, step 11](https://github.com/boolYikes/hobbernetes/tree/2.8/simple_http)

@@ -1,8 +1,3 @@
-# what do we want? a service
-# port to listen to
-# application to directed request to
-# port to direct to
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -14,11 +9,28 @@ spec:
   selector:
     app: simple-http
   ports:
-  - port: 2345
-    name: static
-    protocol: TCP
-    targetPort: 8060
-  - port: 2346
-    name: api
-    protocol: TCP
-    targetPort: 8061
+    - port: 2345
+      name: static
+      protocol: TCP
+      targetPort: 8060
+    - port: 2346
+      name: api
+      protocol: TCP
+      targetPort: 8061
+---
+# headless no clusterip
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: project
+  name: simple-http-pg-svc
+  labels:
+    app: simple-http
+spec:
+  ports:
+    - port: 5432
+      name: postgres
+      targetPort: 5432
+  clusterIP: None
+  selector:
+    app: simple-http
