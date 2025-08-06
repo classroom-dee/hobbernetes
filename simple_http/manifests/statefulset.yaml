@@ -21,7 +21,7 @@ spec:
       containers:
         # static server
         - name: simple-http-static
-          image: xuanminator/simple-http:2.8-static
+          image: xuanminator/simple-http:2.9-static
           imagePullPolicy: Always
           env:
             - name: STATIC_CACHE_DIR # this is passed to the container
@@ -29,6 +29,16 @@ spec:
                 secretKeyRef:
                   name: simple-http-secrets
                   key: STATIC_CACHE_DIR
+            - name: API_URL
+              valueFrom:
+                secretKeyRef:
+                  key: API_URL
+                  name: simple-http-secrets
+            - name: API_URI
+              valueFrom:
+                secretKeyRef:
+                  key: API_URI
+                  name: simple-http-secrets
             - name: STATIC_CACHE_EXPIRY
               valueFrom:
                 secretKeyRef:
@@ -49,18 +59,11 @@ spec:
                 secretKeyRef:
                   name: simple-http-secrets
                   key: STATIC_PORT
-            - name: POSTGRES_USER
+            - name: REDIS_URL
               valueFrom:
                 secretKeyRef:
-                  key: pguser
+                  key: REDIS_URL
                   name: simple-http-secrets
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: pgpassword
-                  name: simple-http-secrets
-          # ports:
-          # - containerPort: 8060
           volumeMounts:
             - name: simple-http-volume
               mountPath: /tmp/simple-http
@@ -73,9 +76,14 @@ spec:
               memory: "128Mi"
         # Container for the api server
         - name: simple-http-api
-          image: xuanminator/simple-http:2.8-api
+          image: xuanminator/simple-http:2.9-api
           imagePullPolicy: Always
           env:
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  key: REDIS_URL
+                  name: simple-http-secrets
             - name: API_URI
               valueFrom:
                 secretKeyRef:
@@ -96,8 +104,6 @@ spec:
                 secretKeyRef:
                   key: pgpassword
                   name: simple-http-secrets
-          # ports:
-          # - containerPort: 8061
           resources:
             requests:
               cpu: "100m"

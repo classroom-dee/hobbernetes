@@ -2,7 +2,8 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY static_server.py requirements.txt /app/
+COPY static_server.py static_utils.py requirements.txt /app/
+COPY static/ /app/static/
 RUN pip install -r requirements.txt --no-cache-dir
 
 EXPOSE 8060

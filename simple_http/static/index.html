@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Todo SPA (WebSocket autosync)</title>
+        <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    </head>
+    <body>
+        <h1>Todo SPA</h1>
+        <img id="todoImg" width="400"><br><br>
+
+        <form id="todoForm">
+            <input id="todoInput" placeholder="Add a todo">
+            <button type="submit">Add</button>
+        </form>
+
+        <h2>Current list</h2>
+        <ul id="list"></ul>
+
+        <script>
+            // config
+            const API = "/todos"; // proxied by static_server.py
+            const ioWS = io(); // default ws://<host>:<port>/
+
+            // helpers
+            async function load() {
+                const res = await fetch(API);
+                const data = await res.json();
+                document.getElementById('list').innerHTML =
+                data.map(t => `<li data-id="${t.id}">${t.item}</li>`).join('');
+            }
+
+            async function loadHero() {
+                const res = await fetch("/image_b64");
+                const j = await res.json();
+                document.getElementById('todoImg').src = `data:image/jpeg;base64,${j.img}`;
+            }
+
+            // DOM listener: submission handle
+            document.getElementById('todoForm').addEventListener('submit', async e => {
+                e.preventDefault();
+                const val = document.getElementById('todoInput').value.trim();
+                if (!val) return;
+                await fetch(API, {
+                    method : 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body   : JSON.stringify({item: val})
+                });
+                document.getElementById('todoInput').value = "";
+            });
+
+            // WebSocket listener: subscription
+            ioWS.on("todo_added", data => {
+                // duplicate-insert guard (could also diff by id list)
+                if (!document.querySelector(`li[data-id="${data.id}"]`)) {
+                const li = document.createElement("li");
+                li.dataset.id = data.id;
+                // li.textContent = data.item;
+                li.innerHTML = data.item;
+                document.getElementById('list').prepend(li);
+                }
+            });
+
+            // boot
+            window.onload = () => { load(); loadHero(); };
+        </script>
+    </body>
+</html>
