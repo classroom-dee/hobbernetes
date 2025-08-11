@@ -76,7 +76,7 @@ spec:
               memory: "128Mi"
         # Container for the api server
         - name: simple-http-api
-          image: xuanminator/simple-http:2.9-api
+          image: xuanminator/simple-http:2.10-api
           imagePullPolicy: Always
           env:
             - name: REDIS_URL

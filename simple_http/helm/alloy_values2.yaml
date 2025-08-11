@@ -1,0 +1,68 @@
+---
+cluster:
+  name: k3d-k3s-default
+
+destinations:
+  - name: loki
+    type: loki
+    url: http://loki.loki-stack:3100/loki/api/v1/push
+
+podLogs:
+  enabled: true
+  # gatherMethod: kubernetesApi
+  # gatherMethod: filelog # file tail
+  gatherMethod: filelog
+  __path__: /lab/docker/containers/*.log # daemonset will mount path correctly?
+  collector: alloy-logs
+  namespaces:
+    - project
+  labelsToKeep:
+    - app.kubernetes.io/name
+    - container
+    - instance
+    - job
+    - level
+    - namespace
+    - service.name
+    - service.namespace
+    - deployment.environment
+    - deployment.environment.name
+    - k8s.namespace.name
+    - k8s.deployment.name
+    - k8s.statefulset.name
+    - k8s.daemonset.name
+    - k8s.cronjob.name
+    - k8s.job.name
+    - k8s.node.name
+    - app
+  structuredMetadata:
+    pod: pod # Set structured metadata "pod" from label "pod"
+
+# Collectors ... which are SAs if kubernetesAPI was used in the gatherMethod section
+alloy-singleton.enabled: false
+alloy-metrics.enabled: false
+alloy-profiles.enabled: false
+alloy-receiver.enabled: false
+
+alloy-logs:
+  enabled: true
+  alloy:
+    stabilityLevel: public-preview
+    mounts:
+      varlog: true
+      dockercontainers: true
+      # extra:
+      #   - name: k3dcontainers
+      #     hostPath: /var/log/containers # node path ...
+      #     # Just to confirm: BC I use different docker path on the host machine (/lab/docker)
+      #     # kubectl debug node/k3d-k3s-default-agent-0 -it --image=busybox -- chroot /host sh
+      #     # and then `ls -l /var/log/containers` -> to confirm the logs are there
+      #     mountPath: /var/log/containers # same path inside the pod
+      #     readOnly: true
+    clustering:
+      enabled: false
+    extraHostPathMounts:
+      - name: varlogcontainers
+        hostPath: /lab/docker/containers
+        mountPath: /var/log/containers # same inside the pod
+        readOnly: true

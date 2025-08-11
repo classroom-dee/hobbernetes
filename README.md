@@ -25,3 +25,4 @@
 - [2.7. Stateful applications](https://github.com/boolYikes/hobbernetes/tree/2.7/ping_pong)
 - [2.8. The project, step 11](https://github.com/boolYikes/hobbernetes/tree/2.8/simple_http)
 - [2.9. The project, step 12](https://github.com/boolYikes/hobbernetes/tree/2.9/simple_http)
+- [2.10. The project, step 13](https://github.com/boolYikes/hobbernetes/tree/2.10/simple_http)
