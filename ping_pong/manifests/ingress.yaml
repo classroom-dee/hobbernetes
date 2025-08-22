@@ -1,0 +1,18 @@
+# This is the same manifest as the one in ping_pong
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: exercises
+  name: ping-log-shared-ingress
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /pingpong
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: ping-pong-svc
+                port:
+                  number: 80

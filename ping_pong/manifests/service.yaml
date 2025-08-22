@@ -7,11 +7,11 @@ metadata:
   labels:
     app: ping-pong
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: ping-pong
   ports:
-    - port: 2345
+    - port: 80
       name: ping
       protocol: TCP
       targetPort: 8089
@@ -29,9 +29,6 @@ spec:
     - port: 5432
       name: postgres
       targetPort: 5432
-    - port: 2345 # needed for metadata, apparently?
-      name: ping
-      targetPort: 8089
   clusterIP: None
   selector:
     app: ping-pong
