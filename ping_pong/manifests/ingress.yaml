@@ -1,4 +1,4 @@
-# This is the same manifest as the one in ping_pong
+# Do not deploy this again if the ingress for log_output is already deployed!
 
 apiVersion: networking.k8s.io/v1
 kind: Ingress

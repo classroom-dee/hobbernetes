@@ -13,7 +13,8 @@ pub async fn ping_logger(
         .ok()
         .and_then(|p| p.parse().ok())
         .unwrap_or(5432);
-    let dbname = env::var("DB_NAME").unwrap_or_else(|_| "postgres".into());
+    let dbname = env::var("DB_NAME").unwrap_or_else(|_| user.clone());
+
 
     let conn_str = format!(
         "host={} port={} user={} password={} dbname={}",

@@ -5,13 +5,15 @@ metadata:
   name: log-output-svc
 # for ingress
 spec:
-  type: ClusterIP
+  # type: ClusterIP
+  type: NodePort
   selector:
     app: log-output
   ports:
-  - port: 2345
-    protocol: TCP
-    targetPort: 8088
+    # - port: 2345
+    - port: 80
+      protocol: TCP
+      targetPort: 8088
 # for nodeport dev
 # spec:
 #   type: NodePort

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: ping-pong
-          image: xuanminator/ping-pong:2.7
+          image: xuanminator/ping-pong:3.2
           imagePullPolicy: Always
           ports:
             - name: ping
@@ -32,6 +32,18 @@ spec:
                 secretKeyRef:
                   key: password
                   name: ping-pong-db-secret
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: db
+                  name: ping-pong-db-secret
+          resources:
+            requests:
+              cpu: "30m"
+              memory: "32Mi"
+            limits:
+              cpu: "60m"
+              memory: "32Mi"
         - name: postgres
           image: postgres:13
           ports:
@@ -48,13 +60,25 @@ spec:
                 secretKeyRef:
                   key: password
                   name: ping-pong-db-secret
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  key: db
+                  name: ping-pong-db-secret
+          # resources:
+          #   requests:
+          #     cpu: "30m"
+          #     memory: "32Mi"
+          #   limits:
+          #     cpu: "60m"
+          #     memory: "32Mi"
           volumeMounts:
-            - name: ping-pong-pg-data
+            - name: ping-pong-pg-dat
               mountPath: /var/lib/postgresql/data
               subPath: postgres
   volumeClaimTemplates:
     - metadata:
-        name: ping-pong-pg-data
+        name: ping-pong-pg-dat
       spec:
         accessModes: ["ReadWriteOnce"]
         resources:

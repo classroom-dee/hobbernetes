@@ -12,7 +12,12 @@ class LogsReqHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         # The result address seems to be from Traefik
-        if self.path == '/logs/all':
+        if self.path in ('/', '/healthz'):
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(b'ok')
+        elif self.path == '/logs/all':
             logs = load_logs()
             response = json.dumps(logs, indent=2).encode('utf-8')
 
@@ -24,7 +29,7 @@ class LogsReqHandler(BaseHTTPRequestHandler):
             # ping_count = len(get_pings()) # File-based method
             ping_count = 0
             try:
-                resp = requests.get('http://ping-pong-svc:2345/pings')
+                resp = requests.get('http://ping-pong-svc/pings')
                 data = resp.json() # { count: n }
                 ping_count = data.get("count", 0)
 

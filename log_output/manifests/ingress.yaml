@@ -7,19 +7,43 @@ metadata:
   name: ping-log-shared-ingress
 spec:
   rules:
-  - http:
-      paths:
-      - path: /logs
-        pathType: Prefix
-        backend:
-          service:
-            name: log-output-svc
-            port: 
-              number: 2345
-      - path: /pingpong
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: ping-pong-svc
-            port: 
-              number: 2345
+    - http:
+        paths:
+          - path: /logs/all
+            pathType: Exact
+            backend:
+              service:
+                name: log-output-svc
+                port:
+                  # number: 2345
+                  number: 80
+          - path: /logs/ping
+            pathType: Exact
+            backend:
+              service:
+                name: log-output-svc
+                port:
+                  # number: 2345
+                  number: 80
+          - path: /
+            pathType: Exact
+            backend:
+              service:
+                name: ping-pong-svc
+                port:
+                  number: 80
+          - path: /pingpong
+            pathType: Exact
+            backend:
+              service:
+                name: ping-pong-svc
+                port:
+                  # number: 2345
+                  number: 80
+          - path: /pings
+            pathType: Exact
+            backend:
+              service:
+                name: ping-pong-svc
+                port:
+                  number: 80

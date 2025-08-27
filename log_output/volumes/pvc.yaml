@@ -5,7 +5,7 @@ metadata:
   namespace: exercises
   name: pvc-1-11
 spec:
-  storageClassName: pv-1-11-storage-class
+  # storageClassName: pv-1-11-storage-class
   accessModes:
     - ReadWriteOnce
   resources:

@@ -33,20 +33,20 @@ spec:
                   name: log-output-configmap-2-5
                   key: MESSAGE
           volumeMounts:
-          - name: shared-log
-            mountPath: /tmp/logs
-          - name: config-volume
-            mountPath: /tmp/config
+            - name: shared-log
+              mountPath: /tmp/logs
+            - name: config-volume
+              mountPath: /tmp/config
           resources:
             requests:
-              cpu: "100m"
+              cpu: "30m"
               memory: "64Mi"
             limits:
-              cpu: "200m"
-              memory: "128Mi"
+              cpu: "60m"
+              memory: "64Mi"
         # fetcher
         - name: log-output-fetcher
-          image: xuanminator/log_output_fetcher:2.5
+          image: xuanminator/log_output_fetcher:3.2
           imagePullPolicy: Always
           env:
             - name: MESSAGE
@@ -55,14 +55,14 @@ spec:
                   name: log-output-configmap-2-5
                   key: MESSAGE
           volumeMounts:
-          - name: shared-log
-            mountPath: /tmp/logs
-          - name: config-volume
-            mountPath: /tmp/config
+            - name: shared-log
+              mountPath: /tmp/logs
+            - name: config-volume
+              mountPath: /tmp/config
           resources:
             requests:
-              cpu: "100m"
+              cpu: "30m"
               memory: "64Mi"
             limits:
-              cpu: "200m"
-              memory: "128Mi"
+              cpu: "60m"
+              memory: "64Mi"
