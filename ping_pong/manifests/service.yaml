@@ -1,4 +1,3 @@
-# ingress
 apiVersion: v1
 kind: Service
 metadata:
@@ -7,7 +6,7 @@ metadata:
   labels:
     app: ping-pong
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: ping-pong
   ports:
@@ -15,6 +14,16 @@ spec:
       name: ping
       protocol: TCP
       targetPort: 8089
+# for ingress
+# spec:
+#   type: NodePort
+#   selector:
+#     app: ping-pong
+#   ports:
+#     - port: 80
+#       name: ping
+#       protocol: TCP
+#       targetPort: 8089
 ---
 # headless - for stset
 apiVersion: v1

@@ -13,7 +13,10 @@ gcloud container clusters create dwk-cluster \
  --num-nodes=3 \
  --machine-type=e2-micro \
  --no-enable-managed-prometheus \
- --logging=NONE
+ --logging=NONE \
+ --gateway-api=standard
+
+# gcloud container clusters update dwk-cluster --location=europe-north1-b --gateway-api=standard
 
 # The managed logger takes up all the resources in a e2-micro.
 # This works too if the cluster is already running
