@@ -9,24 +9,27 @@ spec:
   rules:
     - matches:
         - path:
-            type: Exact
-            value: /logs/all
-        - path:
-            type: Exact
-            value: /logs/ping
+            type: PathPrefix
+            value: /pingpong
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
       backendRefs:
-        - name: log-output-svc
+        - name: ping-pong-svc
           port: 80
     - matches:
         - path:
-            type: Exact
-            value: /
-        - path:
-            type: Exact
-            value: /pingpong
-        - path:
-            type: Exact
-            value: /pings
+            type: PathPrefix
+            value: /logs
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
       backendRefs:
-        - name: ping-pong-svc
+        - name: log-output-svc
           port: 80

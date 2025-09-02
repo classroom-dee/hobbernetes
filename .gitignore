@@ -7,3 +7,4 @@ Cargo.lock
 **/target/release
 .venv
 **/key.txt
+*output

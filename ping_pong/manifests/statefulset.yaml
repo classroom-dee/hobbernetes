@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: ping-pong
-          image: xuanminator/ping-pong:3.2
+          image: xuanminator/ping-pong:3.4
           imagePullPolicy: Always
           ports:
             - name: ping

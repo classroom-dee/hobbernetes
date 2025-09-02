@@ -30,3 +30,4 @@
 - [3.1. Pingpong GKE](https://github.com/boolYikes/hobbernetes/tree/3.1/ping_pong)
 - [3.2. Back to Ingress](https://github.com/boolYikes/hobbernetes/tree/3.2/log_output)
 - [3.3. To the Gateway](https://github.com/boolYikes/hobbernetes/tree/3.3/log_output)
+- [3.4. Rewritten routing](https://github.com/boolYikes/hobbernetes/tree/3.4/log_output)

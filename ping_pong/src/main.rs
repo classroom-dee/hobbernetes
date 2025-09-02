@@ -18,8 +18,7 @@ async fn main() {
     let counter = Arc::new(AtomicUsize::new(0));
 
     let app = Router::new()
-        .route("/", get(handler)) // not needed?
-        .route("/pingpong", get({
+        .route("/", get({ // /pingpong's root
             let counter = Arc::clone(&counter);
             move || utils::ping_logger(Arc::clone(&counter))
         }))
@@ -27,6 +26,7 @@ async fn main() {
             let counter = Arc::clone(&counter);
             move || get_pings(counter)
         }))
+        .route("/pong", get(handler))
         .layer(ServiceBuilder::new().layer(Extension(counter)));
 
     let listener = TcpListener::bind("0.0.0.0:8089").await.unwrap();

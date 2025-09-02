@@ -11,13 +11,12 @@ class LogsReqHandler(BaseHTTPRequestHandler):
     #     pass
 
     def do_GET(self):
-        # The result address seems to be from Traefik
-        if self.path in ('/', '/healthz'):
+        if self.path in ('/', '/healthz'): # /logs routes here
             self.send_response(200)
             self.send_header('Content-Type', 'text/plain')
             self.end_headers()
             self.wfile.write(b'ok')
-        elif self.path == '/logs/all':
+        elif self.path == '/all':
             logs = load_logs()
             response = json.dumps(logs, indent=2).encode('utf-8')
 
@@ -25,7 +24,7 @@ class LogsReqHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(response) # or use byte string for plaintext
-        elif self.path == '/logs/ping':
+        elif self.path == '/ping':
             # ping_count = len(get_pings()) # File-based method
             ping_count = 0
             try:
