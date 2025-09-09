@@ -5,7 +5,8 @@ metadata:
   namespace: project
   name: simple-http-pvc-2-4
 spec:
-  storageClassName: simple-http-pv-2-4-storage-class
+  # no pv on cloud
+  # storageClassName: simple-http-pv-2-4-storage-class
   accessModes:
     - ReadWriteOnce
   resources:

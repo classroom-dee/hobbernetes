@@ -1,4 +1,4 @@
-*.json
+logs.json
 **/target/
 Cargo.lock
 **/*.rs.bk
@@ -8,3 +8,4 @@ Cargo.lock
 .venv
 **/key.txt
 *output
+hadolint

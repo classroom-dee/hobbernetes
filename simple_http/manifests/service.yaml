@@ -5,7 +5,7 @@ metadata:
   name: simple-http-svc
 # for ingress
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: simple-http
   ports:
@@ -32,5 +32,6 @@ spec:
       name: postgres
       targetPort: 5432
   clusterIP: None
+  # not in the same pod!
   selector:
-    app: simple-http
+    app: postgres

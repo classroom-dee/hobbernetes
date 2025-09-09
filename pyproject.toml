@@ -1,0 +1,16 @@
+[project]
+name = "dyrmgraph"
+version = "0.0.1"
+
+[tool.ruff]
+indent-width = 2
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4"]
+fixable = ["ALL"]
+
+[tool.ruff.format]
+indent-style = "space"
+quote-style = "single"
+docstring-code-format = true

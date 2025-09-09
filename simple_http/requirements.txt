@@ -5,3 +5,4 @@ flask-socketio[async_eventlet]
 psycopg2-binary
 redis
 requests
+psycogreen

@@ -11,7 +11,7 @@ gcloud container clusters create dwk-cluster \
  --cluster-version=1.32 \
  --disk-size=32 \
  --num-nodes=3 \
- --machine-type=e2-micro \
+ --machine-type=e2-small \
  --no-enable-managed-prometheus \
  --logging=NONE \
  --gateway-api=standard

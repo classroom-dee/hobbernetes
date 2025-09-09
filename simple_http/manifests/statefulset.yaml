@@ -4,7 +4,7 @@ metadata:
   namespace: project
   name: simple-http-stset
 spec:
-  serviceName: simple-http-pg-svc
+  serviceName: simple-http-svc
   replicas: 1
   selector:
     matchLabels:
@@ -65,7 +65,7 @@ spec:
                   key: REDIS_URL
                   name: simple-http-secrets
           volumeMounts:
-            - name: simple-http-volume
+            - name: simple-http-cache-dir
               mountPath: /tmp/simple-http
           resources:
             requests:
@@ -76,7 +76,7 @@ spec:
               memory: "128Mi"
         # Container for the api server
         - name: simple-http-api
-          image: xuanminator/simple-http:2.10-api
+          image: xuanminator/simple-http:3.5-api
           imagePullPolicy: Always
           env:
             - name: REDIS_URL
@@ -111,32 +111,11 @@ spec:
             limits:
               cpu: "200m"
               memory: "128Mi"
-        # persistence
-        - name: postgres
-          image: postgres:13
-          ports:
-            - name: postgres
-              containerPort: 5432
-          env:
-            - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  key: pguser
-                  name: simple-http-secrets
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: pgpassword
-                  name: simple-http-secrets
-          volumeMounts:
-            - name: simple-http-pg-data
-              mountPath: /var/lib/postgresql/data
   volumeClaimTemplates:
     - metadata:
-        name: simple-http-pg-data
+        name: simple-http-cache-dir
       spec:
         accessModes: ["ReadWriteOnce"]
-        storageClassName: local-path
         resources:
           requests:
             storage: 100Mi

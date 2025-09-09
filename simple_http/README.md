@@ -4,33 +4,27 @@
 - Periodically generates a  random todo and render it
 - Collects request logs with Prom-Alloy stack and sends it to Loki, show it on Grafana
 
+### Notes
+- e2-small was used for monitoring stacks (previously e2-micro)
+
 ### Usage
 1. Create ns: `kubectl create namespace project`
-2. Make a mount path: `docker exec -it k3d-k3s-default-agent-0 mkdir /tmp/simple-http`
-3. Deploy storage:
-   - `https://raw.githubusercontent.com/boolYikes/hobbernetes/2.10/simple_http/volumes/pv.yaml`
-   - `https://raw.githubusercontent.com/boolYikes/hobbernetes/2.10/simple_http/volumes/pvc.yaml`
-4. Deploy secret: Optionally encrypt-decrypt the secret
-   - `https://raw.githubusercontent.com/boolYikes/hobbernetes/2.10/simple_http/manifests/secrets.yaml`
-5. Deploy Redis:
-   - `https://raw.githubusercontent.com/boolYikes/hobbernetes/2.10/simple_http/manifests/redis.yaml`
-6. Deploy manifest:
-   - `kubectl apply -f https://raw.githubusercontent.com/boolYikes/hobbernetes/2.10/simple_http/manifests/statefulset.yaml`
-   - `kubectl apply -f https://raw.githubusercontent.com/boolYikes/hobbernetes/2.10/simple_http/manifests/service.yaml`
-   - `kubectl apply -f https://raw.githubusercontent.com/boolYikes/hobbernetes/2.10/simple_http/manifests/ingress.yaml`
-7. Deploy cronjob: wait before the statefulset deploys completely
-   - `kubectl apply -f https://raw.githubusercontent.com/boolYikes/hobbernetes/2.10/simple_http/manifests/cronjob.yaml`
-8. Deploy the monitoring stack
+2. Deploy: `kubectl apply -k https://raw.githubusercontent.com/boolYikes/hobbernetes/3.5/simple_http/kustomization.yaml`
+3. Get the address `kubectl get ing -n project`
+4. Test it: `http://<adderss>` -> add random page every 1hr
+5. **Below are not tested with this release. (I wasn't sure if monitoring was within the scope)**
+6. Deploy the monitoring stack
    - Note: Might have to change path to /var/log/containers in alloy_values2.yaml
    - `helm install prometheus-community/kube-prometheus-stack --generate-name --namespace prometheus`
    - `helm upgrade --install loki --namespace=loki-stack grafana/loki-stack --set loki.image.tag=2.9.3 --set grafana.enabled=false --set promtail.enabled=false`
-   - `helm upgrade --install alloy grafana/k8s-monitoring -n loki-stack -f https://raw.githubusercontent.com/boolYikes/hobbernetes/2.10/simple_http/helm/alloy_values2.yaml`
+   - `helm upgrade --install alloy grafana/k8s-monitoring -n loki-stack -f https://raw.githubusercontent.com/boolYikes/hobbernetes/3.5/simple_http/helm/alloy_values2.yaml`
    - Port forward grafana, setup loki data source to 'http://loki.loki-stack:3100'
-8. Access it [here](http://localhost:8081) and add todos, a valid one and an invalid one
-9. Check the Explore-logs section, make a query with a filter `app=simple-http`
-10. Logs might spontaneously appear (todo generator)
+7. Access it [here](http://localhost:8081) and add todos, a valid one and an invalid one
+8. Check the Explore-logs section, make a query with a filter `app=simple-http`
+9.  Logs might spontaneously appear (todo generator)
 
 ### Memo
+- Don't use `echo ""` (it adds new lines), use `printf "" | base64`
 - Encrypt
 
 ```bash
