@@ -69,7 +69,8 @@ jobs:
         uses: imranismail/setup-kustomize@v2.1.0
 
       - name: Deploy
-        run: |-
+        run: |
+          cd simple_http
           kustomize edit set image \
             cron=$CRON_TAG \
             api=$API_TAG \
@@ -77,6 +78,6 @@ jobs:
             postgres=postgres:13 \
             redis=redis:7
 
-          kustomize build ./simple_http | kubectl apply -f -
+          kustomize build . | kubectl apply -f -
           kubectl rollout status deployment simple-http-stset
           kubectl get services -o wide
