@@ -79,5 +79,5 @@ jobs:
             redis=redis:7
 
           kustomize build . | kubectl apply -f -
-          kubectl rollout status deployment simple-http-stset
+          kubectl rollout status statefulset -n project simple-http-stset
           kubectl get services -o wide
