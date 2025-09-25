@@ -35,8 +35,10 @@ jobs:
       - name: "Use gcloud CLI"
         run: gcloud info
 
-      - name: "Use GCR instead of Docker Hub"
-        run: gcloud --quiet auth configure-docker
+      - name: "Use Artifact Registry instead of Docker Hub"
+        run: gcloud --quiet auth configure-docker $REGISTRY
+        env:
+          REGISTRY: europe-north1-docker.pkg.dev
 
       - name: "Get GKE credentials"
         uses: "google-github-actions/get-gke-credentials@v2"
