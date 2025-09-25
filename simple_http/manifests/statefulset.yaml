@@ -9,6 +9,8 @@ spec:
   selector:
     matchLabels:
       app: simple-http
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
@@ -21,7 +23,7 @@ spec:
       containers:
         # static server
         - name: simple-http-static
-          image: xuanminator/simple-http:2.9-static
+          image: static
           imagePullPolicy: Always
           env:
             - name: STATIC_CACHE_DIR # this is passed to the container
@@ -76,7 +78,7 @@ spec:
               memory: "128Mi"
         # Container for the api server
         - name: simple-http-api
-          image: xuanminator/simple-http:3.5-api
+          image: api
           imagePullPolicy: Always
           env:
             - name: REDIS_URL

@@ -9,6 +9,8 @@ spec:
   selector:
     matchLabels:
       app: postgres
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
@@ -17,7 +19,7 @@ spec:
       containers:
         # persistence
         - name: postgres
-          image: postgres:13
+          image: postgres
           ports:
             - name: postgres
               containerPort: 5432

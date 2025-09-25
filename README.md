@@ -1,3 +1,9 @@
+<p align="center"> 
+    <a href="#"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/classroom-dee/hobbernetes/main.yaml?label=Release"></a> 
+    <a href="#"><img alt="Coverage" src="https://img.shields.io/codecov/c/github/classroom-dee/hobbernetes"></a> 
+    <a href="#"><img alt="Release" src="https://img.shields.io/github/v/release/classroom-dee/hobbernetes"></a> 
+</p>
+
 # Submissions
 ## Chapter 01
 - [1.1. Getting Started](https://github.com/boolYikes/hobbernetes/tree/1.1/log_output)
@@ -32,3 +38,4 @@
 - [3.3. To the Gateway](https://github.com/boolYikes/hobbernetes/tree/3.3/log_output)
 - [3.4. Rewritten routing](https://github.com/boolYikes/hobbernetes/tree/3.4/log_output)
 - [3.5. The project, step 14](https://github.com/boolYikes/hobbernetes/tree/3.5/simple_http)
+- [3.6. The project, step 15](https://github.com/boolYikes/hobbernetes/tree/3.6/simple_http)

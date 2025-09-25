@@ -11,7 +11,7 @@ spec:
         spec:
           containers:
             - name: simple-http-gen
-              image: xuanminator/simple-http:2.9-gen
+              image: cron
               imagePullPolicy: Always
               env:
                 - name: API_URL
