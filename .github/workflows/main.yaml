@@ -1,7 +1,6 @@
 name: Release
 
 on:
-  # whenever on push tags
   push:
     branches:
       - main
