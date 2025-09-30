@@ -8,24 +8,23 @@
 - e2-small was used for monitoring stacks (previously e2-micro)
 
 ### Usage
-1. Create a docker repository in the GCP artifact registry, cleanup policy: most recent, disable scanning
+1. Create a docker repository `test-repo` in the GCP artifact registry, cleanup policy: most recent, disable scanning
 2. Create SA and key, add secrets to github env secrets
-3. Create ns: `kubectl create namespace project`
-4. Setup workflow in .github/workflow/main.yaml
-5. Push the main branch and then push tag (probablly need forking)
-7. Get the address `kubectl get ing -n project`
-8. Test it: `http://<adderss>` -> add random page every 1hr
-9. **Below are not tested with this release. (I wasn't sure if monitoring was within the scope)**
-10. ~~Deploy the monitoring stack~~
+3. Check the workflow: `.github/workflow/main.yaml`
+4. Push the main branch and then push tag (probablly need forking)
+5. Get the address `kubectl get ing -n project`
+6. Test it: `http://<adderss>` -> add random page every 1hr
+7. **Below are not tested with this release. (I wasn't sure if monitoring was within the scope)**
+8. ~~Deploy the monitoring stack~~
    - Note: Might have to change path to /var/log/containers in alloy_values2.yaml
    - `helm install prometheus-community/kube-prometheus-stack --generate-name --namespace prometheus`
    - `helm upgrade --install loki --namespace=loki-stack grafana/loki-stack --set loki.image.tag=2.9.3 --set grafana.enabled=false --set promtail.enabled=false`
    - `helm upgrade --install alloy grafana/k8s-monitoring -n loki-stack -f https://raw.githubusercontent.com/boolYikes/hobbernetes/3.5/simple_http/helm/alloy_values2.yaml`
    - Port forward grafana, setup loki data source to 'http://loki.loki-stack:3100'
-11. ~~Access it [here](http://localhost:8081) and add todos, a valid one and an invalid one~~
-12. ~~Check the Explore-logs section, make a query with a filter `app=simple-http`~~
-13. ~~Logs might spontaneously appear (todo generator)~~
-14. Clean up the Artifact Registry
+9. ~~Access it [here](http://localhost:8081) and add todos, a valid one and an invalid one~~
+10. ~~Check the Explore-logs section, make a query with a filter `app=simple-http`~~
+11. ~~Logs might spontaneously appear (todo generator)~~
+12. **Clean up the Artifact Registry**
 
 ### Memo
 - Don't use `echo ""` (it adds new lines), use `printf "" | base64`
