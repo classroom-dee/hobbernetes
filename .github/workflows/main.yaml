@@ -55,8 +55,9 @@ jobs:
           ref="${GITHUB_REF_NAME:-${GITHUB_HEAD_REF:-${GITHUB_REF#refs/*/}}}"
           ref_safe="$(echo "$ref" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_.-]+/-/g' | sed -E 's/^-+|-+$//g')"
           short_sha="${GITHUB_SHA::7}"
-          echo "REF_SAFE=$ref_safe" >> "$GITHUB_ENV"
-          echo "IMAGE_SUFFIX=$ref_safe-$short_sha" >> "$GITHUB_ENV"
+          echo "DEBUG: ref name: $ref_safe, sha: $short_sha"
+          echo "REF_SAFE=$ref_safe" >> $GITHUB_ENV
+          echo "IMAGE_SUFFIX=$ref_safe-$short_sha" >> $GITHUB_ENV
           echo "CRON_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/cron:$IMAGE_SUFFIX" >> $GITHUB_ENV
           echo "API_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/api:$IMAGE_SUFFIX" >> $GITHUB_ENV
           echo "STATIC_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/static:$IMAGE_SUFFIX" >> $GITHUB_ENV
