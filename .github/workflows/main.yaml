@@ -5,8 +5,8 @@ on:
     branches:
       - main
       - "**"
-    tags:
-      - "*"
+    # tags:
+    # - "*"
 
 env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
@@ -14,7 +14,7 @@ env:
   GKE_ZONE: europe-north1-b
   REGISTRY: europe-north1-docker.pkg.dev # https://cloud.google.com/artifact-registry/docs/repositories/repo-locations
   REPOSITORY: test-repo
-  BRANCH: ${{ github.ref_name }} # this now gets tags instead of branches
+  BRANCH: ${{ github.ref_name }}
 
 jobs:
   build-publish-deploy:
