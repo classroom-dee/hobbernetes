@@ -1,8 +1,10 @@
 name: Release
 
 on:
-  # whenever on push tags
   push:
+    branches:
+      - main
+      - "**"
     tags:
       - "*"
 
@@ -49,9 +51,13 @@ jobs:
 
       - name: "Set image names"
         run: |
-          echo "CRON_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/cron:$BRANCH-$GITHUB_SHA" >> $GITHUB_ENV
-          echo "API_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/api:$BRANCH-$GITHUB_SHA" >> $GITHUB_ENV
-          echo "STATIC_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/static:$BRANCH-$GITHUB_SHA" >> $GITHUB_ENV
+          ref="${GITHUB_REF_NAME:-${GITHUB_HEAD_REF:-${GITHUB_REF#refs/*/}}}"
+          ref_safe="$(echo "$ref" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_.-]+/-/g' | sed -E 's/^-+|-+$//g')"
+          short_sha="${GITHUB_SHA::7}"
+          echo "DEBUG: ref name: $ref_safe, sha: $short_sha"
+          echo "CRON_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/cron:$ref_safe-$short_sha" >> $GITHUB_ENV
+          echo "API_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/api:$ref_safe-$short_sha" >> $GITHUB_ENV
+          echo "STATIC_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/static:$ref_safe-$short_sha" >> $GITHUB_ENV
 
       - name: "Build"
         run: |
@@ -70,7 +76,40 @@ jobs:
 
       - name: Deploy
         run: |
+          set -euo pipefail
+          ref="${GITHUB_REF_NAME:-${GITHUB_HEAD_REF:-${GITHUB_REF#refs/*/}}}"
+          ref_lower="$(echo "$ref" | tr '[:upper:]' '[:lower:]')"
+
+          ns=""
+          if [ "${GITHUB_REF_TYPE:-branch}" = "branch" ]; then
+            if [[ "$ref_lower" =~ ^(main|master)$ ]]; then
+              ns="project"
+            else
+              ns="project-$ref_lower"
+            fi
+          else
+            git fetch --quiet --deepen=100 || true
+            git fetch --quiet origin "+refs/heads/*:refs/remotes/origin/*"
+            if git branch -r --contains "$GITHUB_SHA" | grep -qE 'origin/(main|master)'; then
+              ns="project"
+            else
+              ns="project-$ref_lower"
+            fi
+          fi
+
+          ns="${ns//\//-}"
+          ns="${ns//_/-}"
+          ns="$(echo "$ns" | sed -E 's/[^a-z0-9-]+/-/g')"
+          ns="$(echo "$ns" | sed -E 's/^-+//; s/-+$//; s/-{2,}/-/g')"
+          ns="${ns:0:63}"; ns="${ns%-}"
+
+          echo "Using namespace: $ns"
+
+          kubectl create namespace "$ns" >/dev/null 2>&1 || true
+          kubectl config set-context --current --namespace="$ns"
+
           cd simple_http
+          kustomize edit set namespace "$ns"
           kustomize edit set image \
             cron=$CRON_TAG \
             api=$API_TAG \
@@ -79,5 +118,6 @@ jobs:
             redis=redis:7
 
           kustomize build . | kubectl apply -f -
-          kubectl rollout status statefulset -n project simple-http-stset
-          kubectl get services -o wide
+          kubectl -n "$ns" rollout status statefulset simple-http-stset
+          kubectl -n "$ns" get services -o wide
+          kubectl -n "$ns" get ing
