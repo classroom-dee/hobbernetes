@@ -39,4 +39,4 @@
 - [3.4. Rewritten routing](https://github.com/boolYikes/hobbernetes/tree/3.4/log_output)
 - [3.5. The project, step 14](https://github.com/boolYikes/hobbernetes/tree/3.5/simple_http)
 - [3.6. The project, step 15](https://github.com/boolYikes/hobbernetes/tree/3.6/simple_http)
-- [3.7. The project, step 16](https://github.com/boolYikes/hobbernetes/tree/3.7/simple_http) further reading: [GC DNS](https://cloud.google.com/kubernetes-engine/docs/tutorials/configuring-domain-name-static-ip)
+- [3.7. The project, step 16](https://github.com/classroom-dee/hobbernetes/tree/3.7/simple_http) further reading: [GC DNS](https://cloud.google.com/kubernetes-engine/docs/tutorials/configuring-domain-name-static-ip)

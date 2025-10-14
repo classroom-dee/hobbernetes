@@ -8,16 +8,20 @@ on:
     # tags:
     # - "*"
 
+  delete:
+    branches:
+      - "**"
+
 env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
   GKE_CLUSTER: dwk-cluster
   GKE_ZONE: europe-north1-b
   REGISTRY: europe-north1-docker.pkg.dev # https://cloud.google.com/artifact-registry/docs/repositories/repo-locations
   REPOSITORY: test-repo
-  BRANCH: ${{ github.ref_name }}
 
 jobs:
   build-publish-deploy:
+    if: github.event_name == 'push'
     name: Build, Publish and Deploy
     runs-on: ubuntu-latest
     environment: yap
@@ -121,3 +125,64 @@ jobs:
           kubectl -n "$ns" rollout status statefulset simple-http-stset
           kubectl -n "$ns" get services -o wide
           kubectl -n "$ns" get ing
+
+  cleanup:
+    name: Cleanup namespace on delete
+    runs-on: ubuntu-latest
+    environment: yap
+    steps:
+      - name: "Use GCP-GitHub Actions API"
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: "${{ secrets.GKE_SA_KEY }}"
+
+      - name: "Set up Cloud SDK"
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: "Get GKE credentials"
+        uses: "google-github-actions/get-gke-credentials@v2"
+        with:
+          cluster_name: "${{ env.GKE_CLUSTER }}"
+          project_id: "${{ env.PROJECT_ID }}"
+          location: "${{ env.GKE_ZONE }}"
+
+      - name: "Delete namespace"
+        env:
+          REF: ${{ github.event.ref }}
+          REF_TYPE: ${{ github.event.ref_type }}
+        run: |
+          set -euo pipefail
+
+          # ref="${GITHUB_REF_NAME:-${GITHUB_HEAD_REF:-${GITHUB_REF#refs/*/}}}"
+
+          ref_lower="$(echo "${REF}" | tr '[:upper:]' '[:lower:]')"
+
+          if [[ "${REF_TYPE}" != "branch" ]]; then
+            echo "Not a branch delete; skipping."
+            exit 0
+          fi
+
+          if [[ "${ref_lower}" =~ ^(main|master)$ ]]; then
+            ns="project"
+          else
+            ns="project-$ref_lower"
+          fi
+
+          ns="${ns//\//-}"
+          ns="${ns//_/-}"
+          ns="$(echo "$ns" | sed -E 's/[^a-z0-9-]+/-/g; s/^-+//; s/-+$//; s/-{2,}/-/g')"
+          ns="${ns:0:63}"; ns="${ns%-}"
+
+          if [[ "$ns" == "project" ]]; then
+            echo "Ref '${REF}' maps to 'project' (main/master). Skipping."
+            exit 0
+          fi
+
+          echo "Deleting namespace: $ns"
+          kubectl get ns "$ns" >/dev/null 2>&1 && kubectl get all -n "$ns" || true
+
+          kubectl delete namespace "$ns" --ignore-not-found=true --wait=false
+
+          kubectl delete namespace "$ns" --ignore-not-found >/dev/null 2>&1 || true
+
+          kubectl get ns "$ns" || echo "Namespace '$ns' not found (deleted or terminating)."
