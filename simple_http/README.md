@@ -7,26 +7,13 @@
 ### Notes
 - e2-small was used for monitoring stacks (previously e2-micro)
 
-### Usage
-1. Create a docker repository `test-repo` in the GCP artifact registry, cleanup policy: most recent, disable scanning
-2. Create SA and key, add secrets to github env secrets
-3. Check the workflow: `.github/workflow/main.yaml`
-4. Checkout to the test branch `git checkout test-branch`, make changes, commit and push
-5. Wait for GA and deployment to complete (It seems to take a while. Grab a cub of tea or something 🙃)
-6. Get the address `kubectl get ing -n project-test-branch`
-7. Test it: `http://<adderss>` -> add random page every 1hr
-8. Repeat with the main branch
-9. **Below are not tested with this release. (I wasn't sure if monitoring was within the scope)**
-10. ~~Deploy the monitoring stack~~
-   - Note: Might have to change path to /var/log/containers in alloy_values2.yaml
-   - `helm install prometheus-community/kube-prometheus-stack --generate-name --namespace prometheus`
-   - `helm upgrade --install loki --namespace=loki-stack grafana/loki-stack --set loki.image.tag=2.9.3 --set grafana.enabled=false --set promtail.enabled=false`
-   - `helm upgrade --install alloy grafana/k8s-monitoring -n loki-stack -f https://raw.githubusercontent.com/boolYikes/hobbernetes/3.5/simple_http/helm/alloy_values2.yaml`
-   - Port forward grafana, setup loki data source to 'http://loki.loki-stack:3100'
-11. ~~Access it [here](http://localhost:8081) and add todos, a valid one and an invalid one~~
-12. ~~Check the Explore-logs section, make a query with a filter `app=simple-http`~~
-13. ~~Logs might spontaneously appear (todo generator)~~
-14. **Clean up the Artifact Registry**
+### Usage (for 3.8)
+1. Create SA and key, add secrets to github env secrets
+2. Check the workflow: `.github/workflow/main.yaml`
+3. Init a cluster and create namespace `project-test-branch`
+4. Create a test branch `git checkout -b test-branch`
+5. Test the workflow: `git push origin --delete test-branch`
+6. Confirm if the namespace is deleted on Lens or kubectl
 
 ### Memo
 - Don't use `echo ""` (it adds new lines), use `printf "" | base64`
