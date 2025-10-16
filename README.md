@@ -41,3 +41,4 @@
 - [3.6. The project, step 15](https://github.com/boolYikes/hobbernetes/tree/3.6/simple_http)
 - [3.7. The project, step 16](https://github.com/classroom-dee/hobbernetes/tree/3.7/simple_http) further reading: [GC DNS](https://cloud.google.com/kubernetes-engine/docs/tutorials/configuring-domain-name-static-ip)
 - [3.8. The project, step 17](https://github.com/boolYikes/hobbernetes/tree/3.8/simple_http)
+- [3.9. DBaaS vs DIY](https://github.com/classroom-dee/hobbernetes/tree/3.9/simple_http)
