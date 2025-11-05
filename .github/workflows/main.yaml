@@ -113,7 +113,7 @@ jobs:
           kubectl config set-context --current --namespace="$ns"
 
           kubectl create secret generic gcs-sa \
-            --from-file=key.json=<(echo "${{ secrets.GKE_SA_KEY }}") \
+            --from-file=key.json="${{ secrets.GKE_SA_KEY }}" \
             --dry-run=client -o yaml | kubectl apply -f -
 
           cd simple_http
