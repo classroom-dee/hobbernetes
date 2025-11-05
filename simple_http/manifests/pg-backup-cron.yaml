@@ -53,13 +53,16 @@ spec:
                   apt-get install -y -qq postgresql-client > /dev/null
                   rm -rf /var/lib/apt/lists/*
 
+                  export PATH="/usr/lib/google-cloud-sdk/bin:/google-cloud-sdk/bin:${PATH}"
+                  command -v gsutil
+
                   TS="$(date +%F)"
                   OUT="gs://${GCS_BUCKET}/${GCS_PREFIX}/${DB_NAME}/${TS}.sql.gz"
                   echo "Backing up ${DB_HOST}:${DB_PORT}/${DB_NAME} -> ${OUT}"
                   PGPASSWORD="${POSTGRES_PASSWORD}" \
                   pg_dump -h "${DB_HOST}" -p "${DB_PORT}" -U "${POSTGRES_USER}" -d "${DB_NAME}" -F p \
                   | gzip -c \
-                  | $(command -v gsutil) cp - "${OUT}"
+                  | gsutil -m cp - "${OUT}"
 
                   echo "Done!"
           volumes:
