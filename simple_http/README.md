@@ -9,5 +9,6 @@
 - Create namespace `project`
 - `git push`
 - If build succeeds, run an ad-hoc job `kubectl -n project create job --from=cronjob/simple-http-backup adhoc-job`
-- Check the job `kubectl -n project get job` and then check the GCS Bucket
-- Clean up the cluster `gcloud_scripts/delete_cluster.sh` and the artifact registry
+- Check the job `kubectl -n project get job` and then check the GCS Bucket (log shows some warnings but should run the job ok)
+- Check the bucket `gc://simple-http-backups/db-backups/simple-http/`
+- Clean up the cluster `gcloud_scripts/delete_cluster.sh` and the Artifact Registry and the Bucket
