@@ -18,11 +18,12 @@ images:
 # branch is pushed first then tags
 # so no problem with actions
 resources:
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/3.6/simple_http/volumes/pvc.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/3.6/simple_http/manifests/secrets.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/3.6/simple_http/manifests/redis.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/3.6/simple_http/manifests/pg-stset.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/3.6/simple_http/manifests/statefulset.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/3.6/simple_http/manifests/service.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/3.6/simple_http/manifests/ingress.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/3.6/simple_http/manifests/cronjob.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/3.10/simple_http/volumes/pvc.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/3.10/simple_http/manifests/secrets.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/3.10/simple_http/manifests/redis.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/3.10/simple_http/manifests/pg-stset.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/3.10/simple_http/manifests/statefulset.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/3.10/simple_http/manifests/service.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/3.10/simple_http/manifests/ingress.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/3.10/simple_http/manifests/cronjob.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/3.10/simple_http/manifests/pg-backup-cron.yaml

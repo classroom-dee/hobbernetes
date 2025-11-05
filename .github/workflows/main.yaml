@@ -112,6 +112,10 @@ jobs:
           kubectl create namespace "$ns" >/dev/null 2>&1 || true
           kubectl config set-context --current --namespace="$ns"
 
+          kubectl create secret generic gcs-sa \
+            --from-file=key.json=<(echo "${{ secrets.GKE_SA_KEY }}") \
+            --dry-run=client -o yaml | kubectl apply -f -
+
           cd simple_http
           kustomize edit set namespace "$ns"
           kustomize edit set image \

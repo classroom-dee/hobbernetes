@@ -1,0 +1,69 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  namespace: project
+  name: simple-http-backup
+spec:
+  schedule: "0 0 * * *" # every midnight
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: backup-runner
+              image: gcr.io/google.com/cloudsdk:slim
+              imagePullPolicy: IfNotPresent
+              env:
+                # GCS
+                - name: GOOGLE_APPLICATION_CREDENTIALS
+                  value: /var/secrets/google/key.json
+                - name: GCS_BUCKET
+                  value: "simple-http-backups"
+                - name: GCS_PREFIX
+                  value: "db-backups"
+                # postgres
+                - name: DB_HOST
+                  value: "simple-http-pg-svc"
+                - name: DB_PORT
+                  value: "5432"
+                - name: DB_NAME
+                  valueFrom:
+                    secretKeyRef:
+                      key: pguser
+                      name: simple-http-secrets
+                - name: POSTGRES_USER
+                  valueFrom:
+                    secretKeyRef:
+                      key: pguser
+                      name: simple-http-secrets
+                - name: POSTGRES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: pgpassword
+                      name: simple-http-secrets
+              volumeMounts:
+                - name: gcp-sa
+                  mountPath: /var/secrets/google
+                  readOnly: true
+              command: ["/bin/bash", "-lc"]
+              args:
+                - |
+                  set -euo pipefail
+                  apt-get update -qq
+                  apt-get install -y -qq postgresql-client > /dev/null
+                  rm -rf /var/lib/apt/lists/*
+
+                  TS="$(date +%F)"
+                  OUT="gs://${GCS_BUCKET}/${GCS_PREFIX}/${DB_NAME}/${TS}.sql.gz"
+                  echo "Backing up ${DB_HOST}:${DB_PORT}/${DB_NAME} -> ${OUT}"
+                  PGPASSWORD="${DB_PASSWORD}" \
+                  pg_dump -h "${DB_HOST}" -p "${DB_PORT}" -U "${DB_USER}" -d "${DB_NAME}" -F p \
+                  | gzip -c \
+                  | gsutil cp - "${OUT}"
+
+                  echo "Done!"
+          volumes:
+            - name: gcp-sa
+              secret:
+                secretName: gcs-sa
+          restartPolicy: OnFailure
