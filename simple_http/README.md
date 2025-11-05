@@ -2,8 +2,9 @@
 ### 3.10. Redundancy
 - Create SA and key, add secrets to github env secrets
 - Add SA permission `storage object admin` (although I think `storage object creator` is enough)
+- Add SA key.json to github secrets. One as-is, one as base64 (double-quote issue): `GKE_SA_KEY`, `GKE_SA_KEY_B64`
+- Edit/check workflow `.github/workflow/main.yaml` for secret names
 - Create a Bucket named `simple-http-backups`
-- Check workflow `.github/workflow/main.yaml`
 - Init the cluster `gcloud_scripts/cluster_init.sh`
 - Create namespace `project`
 - `git push`
