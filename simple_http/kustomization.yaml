@@ -13,6 +13,8 @@ images:
     newName: postgres:13
   - name: redis
     newName: redis:7
+  - name: backup
+    newName: gcr.io/google.com/cloudsdk:slim
 
 # urls
 # branch is pushed first then tags

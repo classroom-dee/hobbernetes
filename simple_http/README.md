@@ -6,3 +6,6 @@
 - Init the cluster `gcloud_scripts/cluster_init.sh`
 - Create namespace `project`
 - `git push`
+- If build succeeds, run an ad-hoc job `kubectl -n project create job --from=cronjob/simple-http-backup adhoc-job-$(date +%s)`
+- Check the job `kubectl -n project get job` and then check the GCS Bucket
+- Clean up the cluster `gcloud_scripts/delete_cluster.sh` and the artifact registry
