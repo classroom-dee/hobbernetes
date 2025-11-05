@@ -14,7 +14,7 @@ images:
   - name: redis
     newName: redis:7
   - name: backup
-    newName: gcr.io/google.com/cloudsdktool/google-cloud-cli:489.0.0-stable
+    newName: gcr.io/google.com/cloudsdktool/google-cloud-cli:stable
 
 # urls
 # branch is pushed first then tags

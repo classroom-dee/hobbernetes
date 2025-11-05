@@ -59,7 +59,7 @@ spec:
                   PGPASSWORD="${POSTGRES_PASSWORD}" \
                   pg_dump -h "${DB_HOST}" -p "${DB_PORT}" -U "${POSTGRES_USER}" -d "${DB_NAME}" -F p \
                   | gzip -c \
-                  | gcloud storage cp - "${OUT}"
+                  | $(command -v gsutil) cp - "${OUT}"
 
                   echo "Done!"
           volumes:
