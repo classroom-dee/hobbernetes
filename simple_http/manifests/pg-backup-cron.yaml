@@ -62,7 +62,7 @@ spec:
                   PGPASSWORD="${POSTGRES_PASSWORD}" \
                   pg_dump -h "${DB_HOST}" -p "${DB_PORT}" -U "${POSTGRES_USER}" -d "${DB_NAME}" -F p \
                   | gzip -c \
-                  | gsutil -m cp - "${OUT}"
+                  | gsutil -h "Content-Type: application/sql" -h "Content-Encoding: gzip" cp - "${OUT}"
 
                   echo "Done!"
           volumes:
