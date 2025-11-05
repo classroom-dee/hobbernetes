@@ -55,6 +55,10 @@ spec:
 
                   export PATH="/usr/lib/google-cloud-sdk/bin:/google-cloud-sdk/bin:${PATH}"
                   command -v gsutil
+                  command -v gcloud
+
+                  gcloud auth activate-service-account --key-file="${GOOGLE_APPLICATION_CREDENTIALS}"
+                  gcloud config set project spartan-setting-469803-r8
 
                   TS="$(date +%F)"
                   OUT="gs://${GCS_BUCKET}/${GCS_PREFIX}/${DB_NAME}/${TS}.sql.gz"
