@@ -123,7 +123,8 @@ jobs:
             api=$API_TAG \
             static=$STATIC_TAG \
             postgres=postgres:13 \
-            redis=redis:7
+            redis=redis:7 \
+            backup=gcr.io/google.com/cloudsdktool/google-cloud-cli:489.0.0-stable
 
           kustomize build . | kubectl apply -f -
           kubectl -n "$ns" rollout status statefulset simple-http-stset
