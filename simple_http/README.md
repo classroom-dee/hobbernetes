@@ -8,8 +8,9 @@
 - Init the cluster `gcloud_scripts/cluster_init.sh`
 - Meanwhile make an artifact registry named `test-repo`
 - Create namespace `project`
-- `git push`
-- Get the address using `kubectl get svc -n project`
-- Make a lot of requests to `/todo` (maybe with a loop in a bash script)
+- `git push`, wait for dep completion ... this'll take some time
+- Get the address using `kubectl get ing -n project`
+- Make a lot of requests to `/todo` (maybe with a loop in a bash script bc hand typing won't exceed 100m cpu :0 )
+- OR do a lot of fibonacci in bash with `kubectl exec -it simple-http-stset-0 -- /bin/bash`?
 - Limits and requests are set low intentionally for replication
 - Clean up the cluster `gcloud_scripts/delete_cluster.sh` and the Artifact Registry
