@@ -1,0 +1,13 @@
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: simple-http-pg-hpa
+  namespace: project # although this is moot now...
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: simple-http-stset
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 50

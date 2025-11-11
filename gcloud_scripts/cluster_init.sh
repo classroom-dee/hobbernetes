@@ -11,12 +11,12 @@ gcloud container clusters create dwk-cluster \
  --cluster-version=1.32 \
  --disk-size=32 \
  --num-nodes=3 \
- --machine-type=e2-small \
+ --machine-type=e2-medium \
  --no-enable-managed-prometheus \
  --logging=NONE \
  --gateway-api=standard
 
-# gcloud container clusters update dwk-cluster --location=europe-north1-b --gateway-api=standard
+# gcloud container clusters update dwk-cluster --location=europe-north1-b --enable-autoscaling --min-nodes=1 --max-nodes=5
 
 # The managed logger takes up all the resources in a e2-micro.
 # This works too if the cluster is already running

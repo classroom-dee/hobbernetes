@@ -43,3 +43,4 @@
 - [3.8. The project, step 17](https://github.com/boolYikes/hobbernetes/tree/3.8/simple_http)
 - [3.9. DBaaS vs DIY](https://github.com/classroom-dee/hobbernetes/tree/3.9/simple_http)
 - [3.10. The project, step 18](https://github.com/classroom-dee/hobbernetes/tree/3.10/simple_http)
+- [3.11. The project, step 18](https://github.com/classroom-dee/hobbernetes/tree/3.11/simple_http)
