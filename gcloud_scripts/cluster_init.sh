@@ -12,13 +12,14 @@ gcloud container clusters create dwk-cluster \
  --disk-size=32 \
  --num-nodes=3 \
  --machine-type=e2-medium \
- --no-enable-managed-prometheus \
- --logging=NONE \
+ --enable-managed-prometheus \
  --gateway-api=standard
+#  --logging=NONE \
+
 
 # gcloud container clusters update dwk-cluster --location=europe-north1-b --enable-autoscaling --min-nodes=1 --max-nodes=5
 
-# The managed logger takes up all the resources in a e2-micro.
+# The managed logger takes up all the resources in a e2-micro. -> --no-enable-managed-prometheus
 # This works too if the cluster is already running
 # `gcloud container clusters update dwk-cluster --disable-managed-prometheus --zone=europe-north1-b --monitoring=NONE`
 

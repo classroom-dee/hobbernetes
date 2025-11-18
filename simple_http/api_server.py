@@ -2,7 +2,7 @@ import eventlet
 
 eventlet.monkey_patch()
 
-import os
+import os  # noqa: E402
 
 from api_utils import (  # noqa: E402
   emit_and_log_error,
@@ -14,6 +14,7 @@ from api_utils import (  # noqa: E402
 from flask import Flask, jsonify, request  # noqa: E402
 from flask_cors import CORS  # noqa: E402
 from flask_socketio import SocketIO  # noqa: E402
+from prometheus_client import Counter, start_http_server  # noqa: E402
 
 API_URI = os.environ.get('API_URI', 'Placeholder')
 API_PORT = int(os.environ.get('API_PORT', 1234))
@@ -30,6 +31,7 @@ socketio = SocketIO(
   engineio_logger=True,
 )
 log = get_logger()
+reqs_count = Counter('todo_post_reqs_count', 'Total number of POST requests to /todo')
 
 with app.app_context():
   init_db()  # but it doesn't need flask at all ... 🤔
@@ -70,8 +72,12 @@ def todos():
     'todo_added',
     {'id': inserted_id, 'item': item, 'created_at': created_at.isoformat()},
   )
+
+  reqs_count.inc()
+
   return jsonify({'message': 'Item added'}), 201
 
 
 if __name__ == '__main__':
-  socketio.run(app, port=API_PORT, host='0.0.0.0', debug=True)
+  start_http_server(8000)  # served at pod:8000
+  socketio.run(app, port=API_PORT, host='0.0.0.0', debug=False)
