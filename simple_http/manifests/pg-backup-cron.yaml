@@ -9,16 +9,18 @@ spec:
     spec:
       template:
         spec:
+          # byebye json sa!
+          serviceAccountName: gcs-sa
           containers:
             - name: backup-runner
               image: backup
               imagePullPolicy: IfNotPresent
               env:
                 # GCS
-                - name: GOOGLE_APPLICATION_CREDENTIALS
-                  value: /var/secrets/google/key.json
+                # - name: GOOGLE_APPLICATION_CREDENTIALS
+                #   value: /var/secrets/google/key.json
                 - name: GCS_BUCKET
-                  value: "simple-http-backups"
+                  value: "mooc-sdw"
                 - name: GCS_PREFIX
                   value: "db-backups"
                 # postgres
@@ -41,10 +43,10 @@ spec:
                     secretKeyRef:
                       key: pgpassword
                       name: simple-http-secrets
-              volumeMounts:
-                - name: gcp-sa
-                  mountPath: /var/secrets/google
-                  readOnly: true
+              # volumeMounts:
+              #   - name: gcp-sa
+              #     mountPath: /var/secrets/google
+              #     readOnly: true
               command: ["/bin/bash", "-lc"]
               args:
                 - |
@@ -57,8 +59,8 @@ spec:
                   command -v gsutil
                   command -v gcloud
 
-                  gcloud auth activate-service-account --key-file=/var/secrets/google/key.json
-                  gcloud config set project spartan-setting-469803-r8
+                  # gcloud auth activate-service-account --key-file=/var/secrets/google/key.json
+                  # gcloud config set project project-44f50a83-ee46-46c4-a3d
 
                   TS="$(date +%F)"
                   OUT="gs://${GCS_BUCKET}/${GCS_PREFIX}/${DB_NAME}/${TS}.sql.gz"
@@ -69,8 +71,8 @@ spec:
                   | gsutil -h "Content-Type: application/sql" -h "Content-Encoding: gzip" cp - "${OUT}"
 
                   echo "Done!"
-          volumes:
-            - name: gcp-sa
-              secret:
-                secretName: gcs-sa
+          # volumes:
+          #   - name: gcp-sa
+          #     secret:
+          #       secretName: gcs-sa
           restartPolicy: OnFailure

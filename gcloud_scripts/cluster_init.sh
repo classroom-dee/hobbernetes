@@ -13,8 +13,14 @@ gcloud container clusters create dwk-cluster \
  --num-nodes=3 \
  --machine-type=e2-medium \
  --enable-managed-prometheus \
- --gateway-api=standard
+ --gateway-api=standard \
+ --workload-pool=project-44f50a83-ee46-46c4-a3d.svc.id.goog \
 #  --logging=NONE \
+
+# cluster workload identity for GCS control
+# gcloud container clusters update dwk-cluster \
+#   --workload-pool=project-44f50a83-ee46-46c4-a3d.svc.id.goog \
+#   --zone=europe-north1-b
 
 
 # gcloud container clusters update dwk-cluster --location=europe-north1-b --enable-autoscaling --min-nodes=1 --max-nodes=5

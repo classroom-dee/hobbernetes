@@ -1,5 +1,9 @@
 name: Release
 
+permissions:
+  contents: read
+  id-token: write
+
 on:
   push:
     branches:
@@ -18,6 +22,7 @@ env:
   GKE_ZONE: europe-north1-b
   REGISTRY: europe-north1-docker.pkg.dev # https://cloud.google.com/artifact-registry/docs/repositories/repo-locations
   REPOSITORY: test-repo
+  GSA: mooc-gke-2025@project-44f50a83-ee46-46c4-a3d.iam.gserviceaccount.com
 
 jobs:
   build-publish-deploy:
@@ -30,10 +35,15 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v4
 
-      - name: "Use GCP-GitHub Actions API"
+      - name: "Use workload federation to authenticate"
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: "${{ secrets.GKE_SA_KEY }}"
+          workload_identity_provider: "projects/704001571944/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider"
+          service_account: "${{ env.GSA }}"
+      # - name: "Use GCP-GitHub Actions API"
+      #   uses: google-github-actions/auth@v2
+      #   with:
+      #     credentials_json: "${{ secrets.GKE_SA_KEY }}"
 
       - name: "Set up Cloud SDK"
         uses: google-github-actions/setup-gcloud@v2
@@ -109,13 +119,18 @@ jobs:
 
           echo "Using namespace: $ns"
 
+          workload_pool="${PROJECT_ID}.svc.id.goog"
+          gcloud iam service-accounts add-iam-policy-binding "${{ env.GSA }}" \
+            --role="roles/iam.workloadIdentityUser" \
+            --member="serviceAccount:${workload_pool}[$ns/gcs-sa]"
+
           kubectl create namespace "$ns" >/dev/null 2>&1 || true
           kubectl config set-context --current --namespace="$ns"
 
-          printf '%s' "${{ secrets.GKE_SA_KEY_B64 }}" | base64 -d > key.json
-          kubectl create secret generic gcs-sa \
-            --from-file=key.json \
-            --dry-run=client -o yaml | kubectl apply -f -
+          # printf '%s' "${{ secrets.GKE_SA_KEY_B64 }}" | base64 -d > key.json
+          # kubectl create secret generic gcs-sa \
+            # --from-file=key.json \
+            # --dry-run=client -o yaml | kubectl apply -f -
 
           cd simple_http
           kustomize edit set namespace "$ns"
@@ -135,12 +150,19 @@ jobs:
   cleanup:
     name: Cleanup namespace on delete
     runs-on: ubuntu-latest
+    if: github.event_name == 'delete'
     environment: yap
     steps:
-      - name: "Use GCP-GitHub Actions API"
+      # - name: "Use GCP-GitHub Actions API"
+      #   uses: google-github-actions/auth@v2
+      # with:
+      #   credentials_json: "${{ secrets.GKE_SA_KEY }}"
+
+      - name: "Use workload federation to authenticate"
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: "${{ secrets.GKE_SA_KEY }}"
+          workload_identity_provider: "projects/704001571944/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider"
+          service_account: "mooc-gke-2025@project-44f50a83-ee46-46c4-a3d.iam.gserviceaccount.com"
 
       - name: "Set up Cloud SDK"
         uses: google-github-actions/setup-gcloud@v2
