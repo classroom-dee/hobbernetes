@@ -5,4 +5,4 @@ metadata:
   name: gcs-sa
   namespace: project
   annotations:
-    iam.gke.io/gcp-service-account: mooc-gke-2025@project-44f50a83-ee46-46c4-a3d.iam.gserviceaccount.com
+    iam.gke.io/gcp-service-account: ""

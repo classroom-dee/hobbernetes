@@ -18,11 +18,14 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+  PROJECT_NAME: ${{ secrets.GKE_PROJECT_NAME }}
+  PROJECT_NUMBER: ${{ secrets.GKE_PROJECT_NUMBER }}
+  GSA_ID: ${{ secrets.GSA_ID }}
   GKE_CLUSTER: dwk-cluster
   GKE_ZONE: europe-north1-b
   REGISTRY: europe-north1-docker.pkg.dev # https://cloud.google.com/artifact-registry/docs/repositories/repo-locations
   REPOSITORY: test-repo
-  GSA: mooc-gke-2025@project-44f50a83-ee46-46c4-a3d.iam.gserviceaccount.com
+  GSA: ${{ secrets.GKE_PROJECT_NAME }}@${{ secrets.GKE_PROJECT }}.iam.gserviceaccount.com
 
 jobs:
   build-publish-deploy:
@@ -38,8 +41,8 @@ jobs:
       - name: "Use workload federation to authenticate"
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: "projects/704001571944/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider"
-          service_account: "${{ env.GSA }}"
+          workload_identity_provider: "projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider"
+          service_account: "${{ env.GSA_ID }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
       # - name: "Use GCP-GitHub Actions API"
       #   uses: google-github-actions/auth@v2
       #   with:
@@ -120,7 +123,7 @@ jobs:
           echo "Using namespace: $ns"
 
           workload_pool="${PROJECT_ID}.svc.id.goog"
-          gcloud iam service-accounts add-iam-policy-binding "${{ env.GSA }}" \
+          gcloud iam service-accounts add-iam-policy-binding "${{ env.GSA_ID }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com" \
             --role="roles/iam.workloadIdentityUser" \
             --member="serviceAccount:${workload_pool}[$ns/gcs-sa]"
 
@@ -142,6 +145,8 @@ jobs:
             redis=redis:7 \
             backup=gcr.io/google.com/cloudsdktool/google-cloud-cli:stable
 
+          kustomize edit add annotation iam.gke.io/gcp-service-account="${{ env.GSA_ID }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
+
           kustomize build . | kubectl apply -f -
           kubectl -n "$ns" rollout status statefulset simple-http-stset
           kubectl -n "$ns" get services -o wide
@@ -161,8 +166,8 @@ jobs:
       - name: "Use workload federation to authenticate"
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: "projects/704001571944/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider"
-          service_account: "mooc-gke-2025@project-44f50a83-ee46-46c4-a3d.iam.gserviceaccount.com"
+          workload_identity_provider: "projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider"
+          service_account: "${{ env.GSA_ID }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
 
       - name: "Set up Cloud SDK"
         uses: google-github-actions/setup-gcloud@v2
