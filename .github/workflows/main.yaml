@@ -145,7 +145,7 @@ jobs:
             redis=redis:7 \
             backup=gcr.io/google.com/cloudsdktool/google-cloud-cli:stable
 
-          kustomize edit add annotation iam.gke.io/gcp-service-account="${{ env.GSA_ID }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
+          kustomize edit add annotation iam.gke.io/gcp-service-account:"${{ env.GSA_ID }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
 
           kustomize build . | kubectl apply -f -
           kubectl -n "$ns" rollout status statefulset simple-http-stset
