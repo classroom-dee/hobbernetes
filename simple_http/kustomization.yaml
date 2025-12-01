@@ -32,3 +32,9 @@ resources:
   - https://raw.githubusercontent.com/classroom-dee/hobbernetes/3.12.1/simple_http/manifests/hpa.yaml
   - https://raw.githubusercontent.com/classroom-dee/hobbernetes/3.12.1/simple_http/manifests/pod-monitor.yaml
   - https://raw.githubusercontent.com/classroom-dee/hobbernetes/3.12.1/simple_http/manifests/ksa.yaml
+
+patches:
+  - path: patch-sa.yaml
+    target:
+      kind: ServiceAccount
+      name: gcs-sa
