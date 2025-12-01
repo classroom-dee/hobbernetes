@@ -8,6 +8,7 @@ ${{ secrets.GKE_PROJECT }} -> project id
 ${{ secrets.GKE_PROJECT_NAME }}
 ${{ secrets.GKE_PROJECT_NUMBER }}
 ${{ secrets.GSA_ID }} -> the front part of the SA email
+other hard coded things : cluster name, bucket name, bucket prefix(subfolder)
 ```
 
 - Follow instructions on [3.11](https://github.com/classroom-dee/hobbernetes/tree/3.11/simple_http)
