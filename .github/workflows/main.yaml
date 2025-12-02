@@ -145,6 +145,10 @@ jobs:
             redis=redis:7 \
             backup=gcr.io/google.com/cloudsdktool/google-cloud-cli:stable
 
+          gcloud projects add-iam-policy-binding "${{ env.PROJECT_ID }}" \
+            --member="serviceAccount:${{ env.PROJECT_NUMBER }}-compute@developer.gserviceaccount.com" \
+            --role="roles/artifactregistry.reader"
+
           cat <<EOF > patch-sa.yaml
           apiVersion: v1
           kind: ServiceAccount
@@ -153,6 +157,7 @@ jobs:
             annotations:
               iam.gke.io/gcp-service-account: "${{ env.GSA_ID }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
           EOF
+
           # kustomize edit add annotation iam.gke.io/gcp-service-account:"${{ env.GSA_ID }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
 
           kustomize build . | kubectl apply -f -
