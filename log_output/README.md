@@ -1,26 +1,18 @@
 ## Log Output
 ### Usage
-- Assuming you have your gcloud cli setup... AND you are on a UNIX based system
-- You need git bash to run these if you are on Windows and run with `bash something.sh`
-- Gateway API init is included in the bash script
-
-1. Start the cluster (I disabled logging and Prometheus because they(...or my inefficient app) kept giving OOM)
-```bash
-curl -fsSL https://raw.githubusercontent.com/boolYikes/hobbernetes/3.4/gcloud_scripts/cluster_init.sh | bash
-```
+1. Start the cluster (uses medium compute resource)
+`curl -fsSL https://raw.githubusercontent.com/boolYikes/hobbernetes/4.1/gcloud_scripts/cluster_init.sh | bash`
 
 2. Apply everything in one go
-```bash
-curl -fsSL https://raw.githubusercontent.com/boolYikes/hobbernetes/3.4/log_output/apply_all.sh | bash
-```
+`curl -fsSL https://raw.githubusercontent.com/boolYikes/hobbernetes/4.1/log_output/apply_all.sh | bash`
 
 3. Run this to get response as an output text file
 ```bash
-curl -fsSL https://raw.githubusercontent.com/boolYikes/hobbernetes/3.4/gcloud_scripts/make_requests_exercise.sh | bash -s -- 2>&1 | tee output
+curl -fsSL https://raw.githubusercontent.com/boolYikes/hobbernetes/4.1/gcloud_scripts/make_requests_exercise.sh | bash -s -- 2>&1 | tee output
 ```
 - OR get the address and inspect pages individually with `kubectl get gateway -n exercises`
 
 4. Delete cluster once done
 ```bash
-curl -fsSL https://raw.githubusercontent.com/boolYikes/hobbernetes/3.4/gcloud_scripts/delete_cluster.sh | bash
+curl -fsSL https://raw.githubusercontent.com/boolYikes/hobbernetes/4.1/gcloud_scripts/delete_cluster.sh | bash
 ```

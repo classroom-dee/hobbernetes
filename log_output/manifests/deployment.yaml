@@ -46,7 +46,7 @@ spec:
               memory: "64Mi"
         # fetcher
         - name: log-output-fetcher
-          image: xuanminator/log_output_fetcher:3.4
+          image: xuanminator/log_output_fetcher:4.1
           imagePullPolicy: Always
           env:
             - name: MESSAGE

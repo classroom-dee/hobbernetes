@@ -45,3 +45,5 @@
 - [3.10. The project, step 18](https://github.com/classroom-dee/hobbernetes/tree/3.10/simple_http)
 - [3.11. The project, step 19](https://github.com/classroom-dee/hobbernetes/tree/3.11/simple_http)
 - [3.12. The project, step 20](https://github.com/classroom-dee/hobbernetes/tree/3.12/simple_http)
+- [3.12.1 *No json key revision*](https://github.com/classroom-dee/hobbernetes/tree/3.12.1/simple_http)
+- [4.1 Readiness probe](https://github.com/classroom-dee/hobbernetes/tree/4.1/log_output)
