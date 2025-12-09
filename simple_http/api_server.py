@@ -42,6 +42,18 @@ def health_check():
   return 'ok', 200
 
 
+@app.get('/ready')
+def readiness():
+  try:
+    with get_conn() as conn, conn.cursor() as cur:
+      cur.execute('SELECT 1')
+  except Exception as e:
+    conn.close()
+    return str(e), 500
+  conn.close()
+  return '', 200
+
+
 @app.route(API_URI, methods=['GET', 'POST'])
 def todos():
   if request.method == 'GET':
@@ -66,6 +78,7 @@ def todos():
     )
     inserted_id, created_at = cur.fetchone()
     conn.commit()
+  conn.close()
 
   # broadcast -> redis/socketIO
   socketio.emit(

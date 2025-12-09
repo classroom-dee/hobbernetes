@@ -80,6 +80,12 @@ spec:
         - name: simple-http-api
           image: api
           imagePullPolicy: Always
+          readinessProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            httpGet:
+              path: /ready
+              port: 8061
           env:
             - name: REDIS_URL
               valueFrom:
