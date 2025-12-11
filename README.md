@@ -48,3 +48,4 @@
 - [3.12.1 *No json key revision*](https://github.com/classroom-dee/hobbernetes/tree/3.12.1/simple_http)
 - [4.1 Readiness probe](https://github.com/classroom-dee/hobbernetes/tree/4.1/log_output)
 - [4.2 The project, step 21](https://github.com/classroom-dee/hobbernetes/tree/4.2/simple_http)
+- [4.3 Prometheus](https://github.com/classroom-dee/hobbernetes/tree/4.3/misc)

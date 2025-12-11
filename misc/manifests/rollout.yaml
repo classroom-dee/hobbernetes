@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: flaky-update-dep
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: flaky-update
+  strategy:
+    canary:
+      steps:
+        - setWeight: 25 # Meaning, 25% traffic to the new version
+        - pause:
+            duration: 30s
+        - setWeight: 50
+        - analysis:
+          templates:
+            - templateName: restart-rate
+        - pause:
+            duration: 30s
+  template:
+    metadata:
+      labels:
+        app: flaky-update
+    spec:
+      containers:
+        - name: flaky-update
+          image: mluukkai/dwk-app8:v1
+          readinessProbe:
+            initialDelaySeconds: 10 # Initial delay until the readiness is tested
+            periodSeconds: 5 # How often to test
+            httpGet:
+              path: /healthz
+              port: 3541
+          livenessProbe:
+            initialDelaySeconds: 20 # Initial delay until the liveness is tested
+            periodSeconds: 5 # How often to test
+            httpGet:
+              path: /healthz
+              port: 3541
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flaky-update-svc
+spec:
+  selector:
+    app: flaky-update
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3541
+  type: LoadBalancer
