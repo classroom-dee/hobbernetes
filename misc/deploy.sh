@@ -10,9 +10,10 @@ if [[ "${1:-}" == "--test" ]]; then
 fi
 
 
-full_path="${pth}/misc/manifests/rollout.yaml"
+rollout="${pth}/misc/manifests/rollout.yaml"
+analysis="${pth}/misc/manifests/analysis-template.yaml"
 argo_ns="argo-rollouts"
 
 kubectl get ns $argo_ns >/dev/null 2>&1 || kubectl create ns $argo_ns
 
-kubectl apply -f $full_path
+kubectl apply -f $rollout

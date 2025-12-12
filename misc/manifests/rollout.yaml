@@ -15,8 +15,8 @@ spec:
             duration: 30s
         - setWeight: 50
         - analysis:
-          templates:
-            - templateName: restart-rate
+            templates:
+              - templateName: restart-rate
         - pause:
             duration: 30s
   template:
@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
         - name: flaky-update
-          image: mluukkai/dwk-app8:v1
+          image: mluukkai/dwk-app8:v4
           readinessProbe:
             initialDelaySeconds: 10 # Initial delay until the readiness is tested
             periodSeconds: 5 # How often to test
