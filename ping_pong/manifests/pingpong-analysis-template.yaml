@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  namespace: exercises
+  name: cpu-usage-rate
+spec:
+  args:
+    - name: namespace
+    - name: cpuThresholdCores
+      value: "1"
+  metrics:
+    - name: cpu-usage-rate
+      initialDelay: 1m
+
+      successCondition: result[0] <= {{args.cpuThresholdCores}}
+      failureCondition: result[0] > {{args.cpuThresholdCores}}
+
+      interval: 30s
+      count: 10
+
+      provider:
+        prometheus:
+          address: http://prom-kube-prometheus-stack-prometheus.prometheus.svc.cluster.local:9090
+          query: |
+            sum(
+              rate(container_cpu_usage_seconds_total{
+                namespace="{{args.namespace}}",
+                container!="",
+                image!=""
+              }[2m])
+            )
