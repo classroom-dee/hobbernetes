@@ -1,5 +1,7 @@
 ## The Project
-### 4.2 The project, step 21
+### 4.4 The project, step 22
+
+**Hope you don't find the procedure too tedious! Maybe i shouldn't have used workflow in this exercise?**
 
 1. SA
 - No longer using JSON SA key (accidentally moved the gcp project under an org -> no permission to enable json key 🤷🏾) -> 
@@ -19,10 +21,10 @@
 
 3. The Rest
 - Edit/check workflow .github/workflow/main.yaml for secret names
-- Create a Bucket named `simple-http-backups`
+- Create a Bucket named `mooc-sdw` and a subdir `db-backups`
 - Make an artifact registry named `test-repo`
 - Init the cluster `./gcloud_scripts/cluster_init.sh`
 - Push the tag and then push to main, wait for deployment success
-- Edit the api manifest to have incorrect info and see it failing
-- Correct the error and see it recovers
+- `kubectl get ing -n project` to get the address
+- Test adding/ticking it off as done
 - Clean up the cluster `./gcloud_scripts/delete_cluster.sh` and the Artifact Registry

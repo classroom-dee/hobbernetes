@@ -11,7 +11,8 @@ patch_psycopg()
 
 def get_conn():
   conn = psycopg2.connect(
-    host='simple-http-pg-svc',  # OR fully qualified: simple-http-pg-svc.project.svc.cluster.local
+    # OR fully qualified: simple-http-pg-svc.project.svc.cluster.local
+    host='simple-http-pg-svc',
     port=5432,
     user=os.getenv('POSTGRES_USER', 'Placeholder').strip(),
     password=os.getenv('POSTGRES_PASSWORD', 'Placeholder').strip(),
@@ -26,6 +27,7 @@ def init_db():
             CREATE TABLE IF NOT EXISTS todos (
                 id SERIAL PRIMARY KEY,
                 item TEXT NOT NULL,
+                done BOOLEAN DEFAULT FALSE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
             """)

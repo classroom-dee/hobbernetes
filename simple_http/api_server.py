@@ -91,6 +91,26 @@ def todos():
   return jsonify({'message': 'Item added'}), 201
 
 
+# for "Done"
+@app.route(f'{API_URI}/<int:id>', methods=['PUT'])
+def update_todo(id):
+  # item = (request.get_json() or {}).get('item')
+
+  # if not item:
+  #   return jsonify({'error': "Missing 'item'"}), 400
+
+  with get_conn() as conn, conn.cursor() as cur:
+    cur.execute('UPDATE todos SET done=%s WHERE id=%s RETURNING id', (True, id))
+    if not cur.fetchone():
+      return jsonify({'error': 'Not found'}), 404
+    conn.commit()
+  conn.close()
+
+  socketio.emit('todo_done', {'id': id})
+
+  return jsonify({'message': 'Item updated'})
+
+
 if __name__ == '__main__':
   start_http_server(8000)  # served at pod:8000
   socketio.run(app, port=API_PORT, host='0.0.0.0', debug=False)

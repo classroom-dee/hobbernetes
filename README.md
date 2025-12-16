@@ -50,3 +50,4 @@
 - [4.2 The project, step 21](https://github.com/classroom-dee/hobbernetes/tree/4.2/simple_http)
 - [4.3 Prometheus](https://github.com/classroom-dee/hobbernetes/tree/4.3/misc)
 - [4.4 Your canary](https://github.com/classroom-dee/hobbernetes/tree/4.4/ping_pong)
+- [4.5 The project, step 22](https://github.com/classroom-dee/hobbernetes/tree/4.5/simple_http)

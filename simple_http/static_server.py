@@ -43,11 +43,23 @@ def proxy_todos():
   return Response(r.content, status=r.status_code, mimetype='application/json')
 
 
+# done proxy
+@app.route(f'{API_URI}/<int:id>', methods=['PUT'])
+def proxy_done(id):
+  r = requests.put(f'{API_URL}{API_URI}/{id}', timeout=3)
+  return Response(r.content, status=r.status_code, mimetype='application/json')
+
+
 # Incoming websocket traffic from the API
 # namespace placeholder
 @socketio.on('todo_added')
 def handle_remote_add(data):
   # data is already delivered to all clients; no server-side handling needed
+  pass
+
+
+@socketio.on('todo_done')
+def handle_remote_done(data):
   pass
 
 

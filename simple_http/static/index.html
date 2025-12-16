@@ -17,24 +17,75 @@
         <h2>Current list</h2>
         <ul id="list"></ul>
 
+        <h2>Done list</h2>
+        <ul id="done"></ul>
+
         <script>
             // config
             const API = "/todos"; // proxied by static_server.py
             const ioWS = io(); // default ws://<host>:<port>/
+            
 
-            // helpers
-            async function load() {
+            function renderTodos(data) {
+                const list = document.getElementById("list");
+                const done = document.getElementById("done");
+
+                list.innerHTML = "";
+                done.innerHTML = "";
+
+                data.forEach(t => {
+                    const li = document.createElement("li");
+                    li.dataset.id = t.id;
+
+                    if (t.done) {
+                        li.textContent = t.item;
+                        done.appendChild(li);
+                    } else {
+                        li.innerHTML = `${t.item} <button class="btn-done">done</button>`;
+                        list.appendChild(li);
+                    }
+                });
+            }
+
+            async function loadAll() {
                 const res = await fetch(API);
                 const data = await res.json();
-                document.getElementById('list').innerHTML =
-                data.map(t => `<li data-id="${t.id}">${t.item}</li>`).join('');
+                renderTodos(data);
             }
+
+            // // helpers
+            // async function load() {
+            //     const res = await fetch(API);
+            //     const data = await res.json();
+            //     document.getElementById('list').innerHTML =
+            //         data.map(t => t.done && `<li data-id="${t.id}">${t.item} <button>done</button> </li>`).join('');
+            // }
+
+            // async function load_done() {
+            //     const res = await fetch(API);
+            //     const data = await res.json();
+            //     document.getElementById('done').innerHTML = 
+            //         data.map(t => t.done ?? `<li data-id="${t.id}">${t.item}</li>`).join('');
+            // }
 
             async function loadHero() {
                 const res = await fetch("/image_b64");
                 const j = await res.json();
                 document.getElementById('todoImg').src = `data:image/jpeg;base64,${j.img}`;
             }
+
+            // dynamic buttons event delegation
+            document.addEventListener("click", async (e) => {
+                if (!e.target.classList.contains("btn-done")) return;
+                const li = e.target.closest("li");
+                const id = li.dataset.id;
+
+                await fetch(`${API}/${id}`, {
+                method: "PUT",
+                headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({ done: true }) // or omit body if your API toggles
+                });
+            });
 
             // DOM listener: submission handle
             document.getElementById('todoForm').addEventListener('submit', async e => {
@@ -49,20 +100,36 @@
                 document.getElementById('todoInput').value = "";
             });
 
-            // WebSocket listener: subscription
+            // WebSocket listeners + DOM updaters:
+            // ioWS.on("todo_added", data => {
+            //     // duplicate-insert guard (could also diff by id list)
+            //     if (!document.querySelector(`li[data-id="${data.id}"]`)) {
+            //     const li = document.createElement("li");
+            //     li.dataset.id = data.id;
+            //     // li.textContent = data.item;
+            //     li.innerHTML = data.item;
+            //     document.getElementById('list').prepend(li);
+            //     }
+            // });
             ioWS.on("todo_added", data => {
-                // duplicate-insert guard (could also diff by id list)
-                if (!document.querySelector(`li[data-id="${data.id}"]`)) {
+                if (document.querySelector(`li[data-id="${data.id}"]`)) return;
+
                 const li = document.createElement("li");
                 li.dataset.id = data.id;
-                // li.textContent = data.item;
-                li.innerHTML = data.item;
-                document.getElementById('list').prepend(li);
-                }
+                li.innerHTML = `${data.item} <button class="btn-done">done</button>`;
+                document.getElementById("list").prepend(li);
             });
+            ioWS.on("todo_done", ({id}) => {
+                const li = document.querySelector(`#list li[data-id="${id}"]`);
+                if (!li) return;
+                li.querySelector(".btn-done")?.remove();
+                document.getElementById("done").prepend(li);
+            });
+            // ioWS.on("todo_added", () => loadAll()); // simplified... not optimized...
+            // ioWS.on("todo_done", () => loadAll());
 
             // boot
-            window.onload = () => { load(); loadHero(); };
+            window.onload = () => { loadAll(); };
         </script>
     </body>
 </html>
