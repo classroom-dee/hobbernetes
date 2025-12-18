@@ -5,6 +5,7 @@ eventlet.monkey_patch()
 import os  # noqa: E402
 
 from api_utils import (  # noqa: E402
+  NatsPublisher,
   emit_and_log_error,
   get_conn,
   get_logger,
@@ -19,6 +20,10 @@ from prometheus_client import Counter, start_http_server  # noqa: E402
 API_URI = os.environ.get('API_URI', 'Placeholder')
 API_PORT = int(os.environ.get('API_PORT', 1234))
 REDIS_URL = os.getenv('REDIS_URL', 'redis://')
+NATS_URL = os.getenv('NATS_URL', 'nats://my-nats.default.svc.cluster.local:4222')
+NATS_SUBJECT_TODO_ADDED = os.getenv('NATS_ADDED_SUBJECT', 'todos.added')
+NATS_SUBJECT_TODO_DONE = os.getenv('NATS_DONE_SUBJECT', 'todos.done')
+
 
 app = Flask(__name__)
 CORS(app)
@@ -31,6 +36,8 @@ socketio = SocketIO(
   engineio_logger=True,
 )
 log = get_logger()
+nats_pub = NatsPublisher(NATS_URL, log)
+nats_pub.start()
 reqs_count = Counter('todo_post_reqs_count', 'Total number of POST requests to /todo')
 
 with app.app_context():
@@ -86,6 +93,12 @@ def todos():
     {'id': inserted_id, 'item': item, 'created_at': created_at.isoformat()},
   )
 
+  # emit to NATS as well
+  nats_pub.publish_json(
+    NATS_SUBJECT_TODO_ADDED,
+    {'id': inserted_id, 'item': item, 'created_at': created_at.isoformat()},
+  )
+
   reqs_count.inc()
 
   return jsonify({'message': 'Item added'}), 201
@@ -107,6 +120,7 @@ def update_todo(id):
   conn.close()
 
   socketio.emit('todo_done', {'id': id})
+  nats_pub.publish_json(NATS_SUBJECT_TODO_DONE, {'message': f'Done with: {id}'})
 
   return jsonify({'message': 'Item updated'})
 

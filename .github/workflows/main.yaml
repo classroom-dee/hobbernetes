@@ -21,6 +21,7 @@ env:
   PROJECT_NAME: ${{ secrets.GKE_PROJECT_NAME }}
   PROJECT_NUMBER: ${{ secrets.GKE_PROJECT_NUMBER }}
   GSA_ID: ${{ secrets.GSA_ID }}
+  DISCORD_HOOK_URL: ${{ secrets.DISCORD_HOOK_URL }}
   GKE_CLUSTER: dwk-cluster
   GKE_ZONE: europe-north1-b
   REGISTRY: europe-north1-docker.pkg.dev # https://cloud.google.com/artifact-registry/docs/repositories/repo-locations
@@ -75,18 +76,21 @@ jobs:
           echo "CRON_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/cron:$ref_safe-$short_sha" >> $GITHUB_ENV
           echo "API_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/api:$ref_safe-$short_sha" >> $GITHUB_ENV
           echo "STATIC_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/static:$ref_safe-$short_sha" >> $GITHUB_ENV
+          echo "BROADCASTER_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/broadcaster:$ref_safe-$short_sha" >> $GITHUB_ENV
 
       - name: "Build"
         run: |
           docker build -q -f ./simple_http/gen.Dockerfile --tag $CRON_TAG ./simple_http
           docker build -q -f ./simple_http/api.Dockerfile --tag $API_TAG ./simple_http
           docker build -q -f ./simple_http/static.Dockerfile --tag $STATIC_TAG ./simple_http
+          docker build -q -f ./simple_http/broadcaster.Dockerfile --tag $BROADCASTER_TAG ./simple_http
 
       - name: "Publish"
         run: |
           docker push $CRON_TAG
           docker push $API_TAG
           docker push $STATIC_TAG
+          docker push $BROADCASTER_TAG
 
       - name: "Set up Kustomize"
         uses: imranismail/setup-kustomize@v2.1.0
@@ -141,6 +145,7 @@ jobs:
             cron=$CRON_TAG \
             api=$API_TAG \
             static=$STATIC_TAG \
+            broadcaster=$BROADCASTER_TAG \
             postgres=postgres:13 \
             redis=redis:7 \
             backup=gcr.io/google.com/cloudsdktool/google-cloud-cli:stable
@@ -156,6 +161,22 @@ jobs:
             name: gcs-sa
             annotations:
               iam.gke.io/gcp-service-account: "${{ env.GSA_ID }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
+          EOF
+
+          cat <<EOF > patch-broadcaster.yaml
+          apiVersion: apps/v1
+          kind: StatefulSet
+          metadata:
+            name: simple-http-stset
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: simple-http-broadcaster
+                    image: broadcaster
+                    env:
+                      - name: DISCORD_HOOK_URL
+                        value: "${{ env.DISCORD_HOOK_URL }}"
           EOF
 
           # kustomize edit add annotation iam.gke.io/gcp-service-account:"${{ env.GSA_ID }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"

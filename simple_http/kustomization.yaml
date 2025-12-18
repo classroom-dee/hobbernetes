@@ -38,3 +38,7 @@ patches:
     target:
       kind: ServiceAccount
       name: gcs-sa
+  - path: patch-broadcaster.yaml
+    target:
+      kind: StatefulSet
+      name: simple-http-stset

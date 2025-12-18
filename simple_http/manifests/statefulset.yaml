@@ -21,6 +21,21 @@ spec:
           persistentVolumeClaim:
             claimName: simple-http-pvc-2-4
       containers:
+        # NOTE: the broadcaster: if replica > 1,
+        # NOTE: then use queue for NATS settings,
+        # NOTE: or don't be a sidecar(separate dep)
+        - name: simple-http-broadcaster
+          image: broadcaster
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
+            limits:
+              cpu: "100m"
+              memory: "128Mi"
+          # env:
+          #   - name: NATS_URL
         # static server
         - name: simple-http-static
           image: static
