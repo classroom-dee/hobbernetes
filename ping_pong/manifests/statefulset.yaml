@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: ping-pong
-          image: xuanminator/ping-pong:3.4
+          image: PINGPONG/IMAGE
           imagePullPolicy: Always
           ports:
             - name: ping
@@ -45,7 +45,7 @@ spec:
               cpu: "60m"
               memory: "32Mi"
         - name: postgres
-          image: postgres:13
+          image: PINGPONG-DB/IMAGE
           readinessProbe:
             initialDelaySeconds: 10
             periodSeconds: 5

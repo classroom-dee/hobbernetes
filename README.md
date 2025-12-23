@@ -52,3 +52,4 @@
 - [4.4 Your canary](https://github.com/classroom-dee/hobbernetes/tree/4.4/ping_pong)
 - [4.5 The project, step 22](https://github.com/classroom-dee/hobbernetes/tree/4.5/simple_http)
 - [4.6 The project, step 23](https://github.com/classroom-dee/hobbernetes/tree/4.6/simple_http)
+- [4.7 Baby steps to GitOps](https://github.com/classroom-dee/hobbernetes/tree/4.7/log_output)

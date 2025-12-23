@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+images:
+  - name: LOGGER/IMAGE
+    newName: xuanminator/log_output_logger:2.5 # placeholders
+  - name: FETCHER/IMAGE
+    newName: xuanminator/log_output_fetcher:4.1
+  - name: PINGPONG/IMAGE
+    newName: xuanminator/ping-pong:3.4
+  - name: PINGPONG-DB/IMAGE
+    newName: postgres:13
+
+resources:
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.7/log_output/volumes/pvc.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.7/log_output/volumes/configmap.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.7/log_output/manifests/deployment.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.7/log_output/manifests/service.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.7/ping_pong/manifests/secrets.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.7/ping_pong/manifests/statefulset.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.7/ping_pong/manifests/service.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.7/log_output/manifests/gateway.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.7/log_output/manifests/httproute.yaml

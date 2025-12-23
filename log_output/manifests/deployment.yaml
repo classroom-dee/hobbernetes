@@ -24,8 +24,8 @@ spec:
       containers:
         # logger
         - name: log-output-logger
-          image: xuanminator/log_output_logger:2.5
-          imagePullPolicy: Always
+          image: LOGGER/IMAGE
+          imagePullPolicy: IfNotPresent
           env:
             - name: MESSAGE
               valueFrom:
@@ -46,7 +46,7 @@ spec:
               memory: "64Mi"
         # fetcher
         - name: log-output-fetcher
-          image: xuanminator/log_output_fetcher:4.1
+          image: FETCHER/IMAGE
           imagePullPolicy: Always
           env:
             - name: MESSAGE

@@ -7,6 +7,6 @@ Cargo.lock
 **/target/release
 .venv
 **/key.txt
-*output
+**/output
 hadolint
 mooc_SA.json
