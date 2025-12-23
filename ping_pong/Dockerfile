@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     musl-tools \
     build-essential \
     pkg-config \
+    libssl-dev \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
     && rustup target add x86_64-unknown-linux-musl \
