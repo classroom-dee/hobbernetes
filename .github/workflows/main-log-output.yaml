@@ -76,7 +76,7 @@ jobs:
         run: |
           docker build -q -f ./log_output/logger.Dockerfile --tag $LOGGER_TAG ./log_output
           docker build -q -f ./log_output/fetcher.Dockerfile --tag $FETCHER_TAG ./log_output
-          docker build -q ./ping_pong/Dockerfile --tag $PINGPONG_TAG ./ping_pong
+          docker build -q -f ./ping_pong/Dockerfile --tag $PINGPONG_TAG ./ping_pong
 
       - name: "Publish"
         run: |
