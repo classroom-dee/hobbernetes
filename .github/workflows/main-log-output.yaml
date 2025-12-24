@@ -38,6 +38,8 @@ jobs:
     steps:
       - name: "Checkout"
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: "Use workload federation to authenticate"
         uses: google-github-actions/auth@v2
@@ -138,10 +140,10 @@ jobs:
           add: "log_output/kustomization.yaml"
           message: New version released ${{ github.sha }} [skip ci]
 
-      - name: Push tag
-        run: |
-          git tag -f 4.7
-          git push origin -f 4.7
+      # - name: Push tag
+      #   run: |
+      #     git tag -f 4.7
+      #     git push origin -f 4.7
 
   cleanup:
     name: Cleanup namespace on delete
