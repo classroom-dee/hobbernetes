@@ -37,7 +37,7 @@ kubectl get secret -n argocd argocd-initial-admin-secret -o json
 
 5. On ArgoCD, add new app, set PATH to log_output, sync and see it progress.
 
-6. make modifications, push with commit message `[log-output]`, and re-sync
+6. make modifications, force push tag `4.7` with commit message `[log-output]`, and re-sync
 
 7. Delete cluster once done
 ```bash
