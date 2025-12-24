@@ -34,11 +34,11 @@ resources:
   - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.8/simple_http/manifests/ksa.yaml
 
 patches:
-  - path: patch-sa.yaml
+  - path: simple_http/patch-sa.yaml
     target:
       kind: ServiceAccount
       name: gcs-sa
-  - path: patch-broadcaster.yaml
+  - path: simple_http/patch-broadcaster.yaml
     target:
       kind: StatefulSet
       name: simple-http-stset
