@@ -6,9 +6,11 @@ permissions:
 
 on:
   push:
-    branches:
-      - main
-      - "**"
+    # branches:
+    #   - main
+    #   - "**"
+    tags:
+      - "*"
 
   delete:
     branches:
