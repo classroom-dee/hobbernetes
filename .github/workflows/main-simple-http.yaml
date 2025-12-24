@@ -153,7 +153,7 @@ jobs:
             --member="serviceAccount:${{ env.PROJECT_NUMBER }}-compute@developer.gserviceaccount.com" \
             --role="roles/artifactregistry.reader"
 
-          cat <<EOF > patch-sa.yaml
+          cat <<EOF > simple_http/patch-sa.yaml
           apiVersion: v1
           kind: ServiceAccount
           metadata:
@@ -162,7 +162,7 @@ jobs:
               iam.gke.io/gcp-service-account: "${{ env.GSA_ID }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
           EOF
 
-          cat <<EOF > patch-broadcaster.yaml
+          cat <<EOF > simple_http/patch-broadcaster.yaml
           apiVersion: apps/v1
           kind: StatefulSet
           metadata:
@@ -188,8 +188,12 @@ jobs:
       - name: Commit back to main
         uses: EndBug/add-and-commit@v9
         with:
-          add: "simple_http/kustomization.yaml"
           message: New Simple Http Release ${{ github.sha }} [skip ci]
+          add: |
+            simple_http/kustomization.yaml
+            simple_http/patch-sa.yaml
+            simple_http/patch-broadcaster.yaml
+            README.md
 
   cleanup:
     name: Cleanup namespace on delete
