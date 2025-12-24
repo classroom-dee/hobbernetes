@@ -3,42 +3,52 @@ kind: Kustomization
 
 # NewNames are for local dev
 images:
-  - name: cron
-    newName: xuanminator/simple-http:2.9-gen
-  - name: static
-    newName: xuanminator/simple-http:2.9-static
-  - name: api
-    newName: xuanminator/simple-http:3.5-api
-  - name: postgres
-    newName: postgres:13
-  - name: redis
-    newName: redis:7
-  - name: backup
-    newName: gcr.io/google.com/cloudsdktool/google-cloud-cli:stable
+- name: api
+  newName: europe-north1-docker.pkg.dev/project-44f50a83-ee46-46c4-a3d/test-repo/api
+  newTag: 4.8-b6b1c1d
+- name: backup
+  newName: gcr.io/google.com/cloudsdktool/google-cloud-cli
+  newTag: stable
+- name: broadcaster
+  newName: europe-north1-docker.pkg.dev/project-44f50a83-ee46-46c4-a3d/test-repo/broadcaster
+  newTag: 4.8-b6b1c1d
+- name: cron
+  newName: europe-north1-docker.pkg.dev/project-44f50a83-ee46-46c4-a3d/test-repo/cron
+  newTag: 4.8-b6b1c1d
+- name: postgres
+  newName: postgres
+  newTag: "13"
+- name: redis
+  newName: redis
+  newTag: "7"
+- name: static
+  newName: europe-north1-docker.pkg.dev/project-44f50a83-ee46-46c4-a3d/test-repo/static
+  newTag: 4.8-b6b1c1d
 
 # urls
 # branch is pushed first then tags
 # so no problem with actions
 resources:
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/volumes/pvc.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/manifests/secrets.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/manifests/redis.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/manifests/pg-stset.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/manifests/statefulset.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/manifests/service.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/manifests/ingress.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/manifests/cronjob.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/manifests/pg-backup-cron.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/manifests/hpa.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/manifests/pod-monitor.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/manifests/ksa.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/volumes/pvc.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/manifests/secrets.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/manifests/redis.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/manifests/pg-stset.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/manifests/statefulset.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/manifests/service.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/manifests/ingress.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/manifests/cronjob.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/manifests/pg-backup-cron.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/manifests/hpa.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/manifests/pod-monitor.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.6/simple_http/manifests/ksa.yaml
 
 patches:
-  - path: patch-sa.yaml
-    target:
-      kind: ServiceAccount
-      name: gcs-sa
-  - path: patch-broadcaster.yaml
-    target:
-      kind: StatefulSet
-      name: simple-http-stset
+- path: patch-sa.yaml
+  target:
+    kind: ServiceAccount
+    name: gcs-sa
+- path: patch-broadcaster.yaml
+  target:
+    kind: StatefulSet
+    name: simple-http-stset
+namespace: project-4-8
