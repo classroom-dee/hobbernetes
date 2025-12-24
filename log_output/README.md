@@ -1,11 +1,13 @@
 ## Log Output 4.7
 ### Usage
 
-1. Start the cluster, fork this repo and start ArgoCD 
+1. Start the cluster, fork this repo and start ArgoCD, patch it to use LB, 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/boolYikes/hobbernetes/4.7/gcloud_scripts/cluster_init.sh | bash
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+kubectl get secret -n argocd argocd-initial-admin-secret -o json
 ```
 
 2. SA
@@ -33,7 +35,7 @@ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/st
 4. Github
 - Check workflow permissions (RW)
 
-5. Sync from ArgoCD and see it progress.
+5. On ArgoCD, add new app, set PATH to log_output, sync and see it progress.
 
 6. make modifications, push with commit message `[log-output]`, and re-sync
 
