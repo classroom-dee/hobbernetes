@@ -5,16 +5,16 @@ kind: Kustomization
 images:
 - name: api
   newName: europe-north1-docker.pkg.dev/project-44f50a83-ee46-46c4-a3d/test-repo/api
-  newTag: 4.8-b6b1c1d
+  newTag: 4.8-3b745fd
 - name: backup
   newName: gcr.io/google.com/cloudsdktool/google-cloud-cli
   newTag: stable
 - name: broadcaster
   newName: europe-north1-docker.pkg.dev/project-44f50a83-ee46-46c4-a3d/test-repo/broadcaster
-  newTag: 4.8-b6b1c1d
+  newTag: 4.8-3b745fd
 - name: cron
   newName: europe-north1-docker.pkg.dev/project-44f50a83-ee46-46c4-a3d/test-repo/cron
-  newTag: 4.8-b6b1c1d
+  newTag: 4.8-3b745fd
 - name: postgres
   newName: postgres
   newTag: "13"
@@ -23,7 +23,7 @@ images:
   newTag: "7"
 - name: static
   newName: europe-north1-docker.pkg.dev/project-44f50a83-ee46-46c4-a3d/test-repo/static
-  newTag: 4.8-b6b1c1d
+  newTag: 4.8-3b745fd
 
 # urls
 # branch is pushed first then tags
