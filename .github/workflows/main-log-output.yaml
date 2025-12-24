@@ -1,7 +1,7 @@
 name: Release
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 on:
@@ -42,6 +42,7 @@ jobs:
         with:
           workload_identity_provider: "projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider"
           service_account: "${{ env.GSA_ID }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
+          persist-credentials: true
 
       - name: "Set up Cloud SDK"
         uses: google-github-actions/setup-gcloud@v2
@@ -75,7 +76,7 @@ jobs:
         run: |
           docker build -q -f ./log_output/logger.Dockerfile --tag $LOGGER_TAG ./log_output
           docker build -q -f ./log_output/fetcher.Dockerfile --tag $FETCHER_TAG ./log_output
-          docker build -f ./ping_pong/Dockerfile --tag $PINGPONG_TAG --progress=plain ./ping_pong
+          docker build -q ./ping_pong/Dockerfile --tag $PINGPONG_TAG ./ping_pong
 
       - name: "Publish"
         run: |
@@ -134,6 +135,11 @@ jobs:
         with:
           add: "log_output/kustomization.yaml"
           message: New version released ${{ github.sha }} [skip ci]
+
+      - name: Push tag
+        run: |
+          git tag -f 4.7
+          git push origin -f 4.7
 
   cleanup:
     name: Cleanup namespace on delete
