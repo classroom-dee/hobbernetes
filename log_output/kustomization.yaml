@@ -4,16 +4,16 @@ kind: Kustomization
 images:
 - name: FETCHER/IMAGE
   newName: europe-north1-docker.pkg.dev/project-44f50a83-ee46-46c4-a3d/test-repo/fetcher
-  newTag: main-2f77217
+  newTag: 4.7-7948aff
 - name: LOGGER/IMAGE
   newName: europe-north1-docker.pkg.dev/project-44f50a83-ee46-46c4-a3d/test-repo/logger
-  newTag: main-2f77217
+  newTag: 4.7-7948aff
 - name: PINGPONG-DB/IMAGE
   newName: postgres
   newTag: "13"
 - name: PINGPONG/IMAGE
   newName: europe-north1-docker.pkg.dev/project-44f50a83-ee46-46c4-a3d/test-repo/pingpong
-  newTag: main-2f77217
+  newTag: 4.7-7948aff
 
 resources:
 - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.7/log_output/volumes/pvc.yaml
@@ -25,4 +25,4 @@ resources:
 - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.7/ping_pong/manifests/service.yaml
 - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.7/log_output/manifests/gateway.yaml
 - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.7/log_output/manifests/httproute.yaml
-namespace: exercises
+namespace: exercises-4-7
