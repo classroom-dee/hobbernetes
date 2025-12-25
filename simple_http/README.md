@@ -3,13 +3,26 @@
 - Deploys to release, if tag-based push otherwise, to main
 
 ### Usage
-1. Start the cluster, fork this repo and start ArgoCD, patch it to use LB, 
+1. Start the cluster, fork this repo and start ArgoCD, patch it to use LB, install prom and NATS
 ```bash
 curl -fsSL https://raw.githubusercontent.com/boolYikes/hobbernetes/4.9/gcloud_scripts/cluster_init.sh | bash
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
 kubectl get secret -n argocd argocd-initial-admin-secret -o json
+helm install prom prometheus-community/kube-prometheus-stack -n prometheus --create-namespace
+helm install \
+  my-nats oci://registry-1.docker.io/bitnamicharts/nats \
+  --set image.registry=docker.io \
+  --set image.repository=bitnamilegacy/nats \
+  --set image.tag=2.11.8-debian-12-r0 \
+  --set metrics.enabled=true \
+  --set auth.enabled=false \
+  --set metrics.image.registry=docker.io \
+  --set metrics.image.repository=bitnamilegacy/nats-exporter \
+  --set metrics.image.tag=0.17.3-debian-12-r8 \
+  --set metrics.serviceMonitor.enabled=true \
+  --set metrics.serviceMonitor.namespace=prometheus
 ```
 
 2. SA
@@ -39,7 +52,7 @@ kubectl get secret -n argocd argocd-initial-admin-secret -o json
 
 5. On ArgoCD, add new app, set PATH to either `simple_http/overlays/prod/kustomization.yaml` or `.../staging/kustomization.yaml`, namespace to `project-4-9-prod` or if staging, `project-stage`, sync and see it progress.
 
-6. make modifications, force push tag `4.9` with commit message `[simple-http]`, and re-sync
+6. make modifications, force push tag `4.9` with commit message `[simple-http]`, and re-sync, if there was a previous run, delete the pod to refresh.
 
 7. NATS feeds are printed in the pod log 
 
