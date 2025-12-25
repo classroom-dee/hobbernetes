@@ -38,9 +38,6 @@ jobs:
         with:
           ref: main
 
-      - name: "Fetch and checkout tag"
-        run: git fetch --tags && git checkout ${{ github.ref }} && git switch main
-
       - name: "Use workload federation to authenticate"
         uses: google-github-actions/auth@v2
         with:
@@ -180,8 +177,6 @@ jobs:
         uses: EndBug/add-and-commit@v9
         with:
           message: New Simple Http Release ${{ github.sha }} [skip ci]
-          branch: main
-          push: true
           add: "."
 
   cleanup:
