@@ -36,7 +36,7 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: "${{ github.ref }}"
 
       - name: "Use workload federation to authenticate"
         uses: google-github-actions/auth@v2
@@ -162,21 +162,9 @@ jobs:
               iam.gke.io/gcp-service-account: "${{ env.GSA_ID }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
           EOF
 
-          cat <<EOF > patch-broadcaster.yaml
-          apiVersion: apps/v1
-          kind: StatefulSet
-          metadata:
-            name: simple-http-stset
-          spec:
-            template:
-              spec:
-                containers:
-                  - name: simple-http-broadcaster
-                    image: broadcaster
-                    env:
-                      - name: DISCORD_HOOK_URL
-                        value: "${{ env.DISCORD_HOOK_URL }}"
-          EOF
+          kubectl create secret generic discord-hook \
+            --from-literal=discord_hook="${{ env.DISCORD_HOOK_URL }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
 
           # kustomize edit add annotation iam.gke.io/gcp-service-account:"${{ env.GSA_ID }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
 
@@ -189,11 +177,9 @@ jobs:
         uses: EndBug/add-and-commit@v9
         with:
           message: New Simple Http Release ${{ github.sha }} [skip ci]
-          add: |
-            simple_http/kustomization.yaml
-            simple_http/patch-sa.yaml
-            simple_http/patch-broadcaster.yaml
-            README.md
+          branch: main
+          push: true
+          add: "."
 
   cleanup:
     name: Cleanup namespace on delete

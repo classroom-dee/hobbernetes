@@ -34,8 +34,12 @@ spec:
             limits:
               cpu: "100m"
               memory: "128Mi"
-          # env:
-          #   - name: NATS_URL
+          env:
+            - name: DISCORD_HOOK_URL
+              valueFrom:
+                secretKeyRef:
+                  key: discord_hook
+                  name: discord-hook
         # static server
         - name: simple-http-static
           image: static
