@@ -193,6 +193,7 @@ jobs:
       - name: Production?
         if: startsWith(github.ref, 'refs/tags/')
         run: |
+          kubectl create namespace "$NS-prod"
 
           kubectl create secret generic discord-hook \
             --from-literal=discord_hook="${{ env.DISCORD_HOOK_URL }}" \
@@ -204,6 +205,7 @@ jobs:
       - name: Staging?
         if: github.ref == 'refs/heads/main'
         run: |
+          kubectl create namespace "$NS-stage"
 
           kubectl create secret generic discord-hook \
             --from-literal=discord_hook="dev://" \
