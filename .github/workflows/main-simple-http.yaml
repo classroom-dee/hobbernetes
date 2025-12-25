@@ -49,10 +49,13 @@ jobs:
             echo "TARGET_BRANCH=main" >> "$GITHUB_ENV"
           fi
 
-      - name: Switch/create target branch, starting from target commit
+      - name: Switch/create target branch + workflow perm workaround
         run: |
           set -euo pipefail
-          git checkout -B "$TARGET_BRANCH" "$GITHUB_SHA"
+          # git checkout -B "$TARGET_BRANCH" "$GITHUB_SHA"
+          git switch --create "$TARGET_BRANCH"
+          git checkout origin/main -- .github/workflows
+          git add .github/workflows
 
       - name: "Use workload federation to authenticate"
         uses: google-github-actions/auth@v2
