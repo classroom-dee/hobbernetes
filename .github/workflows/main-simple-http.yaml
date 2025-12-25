@@ -43,7 +43,7 @@ jobs:
 
       - name: Decide target branch
         run: |
-          if startsWith "${GITHUB_REF}" "refs/tags/"; then
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
             echo "TARGET_BRANCH=release" >> "$GITHUB_ENV"
           else
             echo "TARGET_BRANCH=main" >> "$GITHUB_ENV"
@@ -214,7 +214,8 @@ jobs:
         with:
           message: New Simple Http Release ${{ github.sha }} [skip ci]
           add: "."
-          branch: ${{ env.TARGET_BRANCH }}
+          new_branch: ${{ env.TARGET_BRANCH }}
+          push: "origin ${{ env.TARGET_BRANCH }} --set-upstream"
 
   cleanup:
     name: Cleanup namespace on delete
