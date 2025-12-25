@@ -1,9 +1,8 @@
 name: Release
 
 permissions:
-  write-all
-  # contents: write
-  # id-token: write
+  contents: write
+  id-token: write
 
 on:
   push:
@@ -214,7 +213,7 @@ jobs:
         uses: EndBug/add-and-commit@v9
         with:
           message: New Simple Http Release ${{ github.sha }} [skip ci]
-          add: ".vscode/ gcloud_scripts/ log_output/ misc/ old_kubeadm_setup/ ping_pong/ redis/ simple_http/ .gitignore .pre-commit-config.yaml .prettierrc pyproject.toml README.md"
+          add: "."
           new_branch: ${{ env.TARGET_BRANCH }}
           push: "origin ${{ env.TARGET_BRANCH }} --set-upstream"
 
