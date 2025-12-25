@@ -36,7 +36,10 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v4
         with:
-          ref: "${{ github.ref }}"
+          ref: main
+
+      - name: "Fetch and checkout tag"
+        run: git fetch --tags && git checkout ${{ github.ref }}
 
       - name: "Use workload federation to authenticate"
         uses: google-github-actions/auth@v2
