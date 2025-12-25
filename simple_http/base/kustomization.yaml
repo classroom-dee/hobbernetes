@@ -4,48 +4,49 @@ kind: Kustomization
 # NewNames are for local dev
 # These are filled by Workflow
 images:
-  - name: api
-    newName: europe-north1-docker.pkg.dev/project-44f50a83-ee46-46c4-a3d/test-repo/api
-    newTag: 4.8-1a9d12a
-  - name: backup
-    newName: gcr.io/google.com/cloudsdktool/google-cloud-cli
-    newTag: stable
-  - name: broadcaster
-    newName: europe-north1-docker.pkg.dev/project-44f50a83-ee46-46c4-a3d/test-repo/broadcaster
-    newTag: 4.8-1a9d12a
-  - name: cron
-    newName: europe-north1-docker.pkg.dev/project-44f50a83-ee46-46c4-a3d/test-repo/cron
-    newTag: 4.8-1a9d12a
-  - name: postgres
-    newName: postgres
-    newTag: "13"
-  - name: redis
-    newName: redis
-    newTag: "7"
-  - name: static
-    newName: europe-north1-docker.pkg.dev/project-44f50a83-ee46-46c4-a3d/test-repo/static
-    newTag: 4.8-1a9d12a
+- name: api
+  newName: europe-north1-docker.pkg.dev/project-44f50a83-ee46-46c4-a3d/test-repo/api
+  newTag: 4.9-67a98bb
+- name: backup
+  newName: gcr.io/google.com/cloudsdktool/google-cloud-cli
+  newTag: stable
+- name: broadcaster
+  newName: europe-north1-docker.pkg.dev/project-44f50a83-ee46-46c4-a3d/test-repo/broadcaster
+  newTag: 4.9-67a98bb
+- name: cron
+  newName: europe-north1-docker.pkg.dev/project-44f50a83-ee46-46c4-a3d/test-repo/cron
+  newTag: 4.9-67a98bb
+- name: postgres
+  newName: postgres
+  newTag: "13"
+- name: redis
+  newName: redis
+  newTag: "7"
+- name: static
+  newName: europe-north1-docker.pkg.dev/project-44f50a83-ee46-46c4-a3d/test-repo/static
+  newTag: 4.9-67a98bb
 
 # urls
 # branch is pushed first then tags
 # so no problem with actions
 resources:
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/volumes/pvc.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/secrets.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/redis.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/pg-stset.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/statefulset.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/service.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/ingress.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/cronjob.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/pg-backup-cron.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/hpa.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/pod-monitor.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/ksa.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/volumes/pvc.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/secrets.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/redis.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/pg-stset.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/statefulset.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/service.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/ingress.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/cronjob.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/pg-backup-cron.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/hpa.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/pod-monitor.yaml
+- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/ksa.yaml
 
-patches:
   # Path should be relative to the kustomization file containing the patch
-  - path: patch-sa.yaml
-    target:
-      kind: ServiceAccount
-      name: gcs-sa
+patches:
+- path: patch-sa.yaml
+  target:
+    kind: ServiceAccount
+    name: gcs-sa
+namespace: project-4-9
