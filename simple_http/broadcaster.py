@@ -17,20 +17,23 @@ DISCORD_HOOK_URL = os.getenv(
 
 
 def post_to_discord(webhook_url: str, content: str):
-  data = json.dumps({'content': content}).encode('utf-8')
-  req = urllib.request.Request(
-    webhook_url,
-    data=data,
-    headers={'Content-Type': 'application/json'},
-    method='POST',
-  )
-  try:
-    with urllib.request.urlopen(req, timeout=5) as resp:
-      resp.read()
-  except urllib.error.HTTPError as e:
-    print(f'Discord webhook error {e.code}: {e.read()}')
-  except Exception as e:
-    print(f'Discord webhook exception: {e}')
+  if webhook_url == 'dev://' or not webhook_url:
+    print(content)
+  else:
+    data = json.dumps({'content': content}).encode('utf-8')
+    req = urllib.request.Request(
+      webhook_url,
+      data=data,
+      headers={'Content-Type': 'application/json'},
+      method='POST',
+    )
+    try:
+      with urllib.request.urlopen(req, timeout=5) as resp:
+        resp.read()
+    except urllib.error.HTTPError as e:
+      print(f'Discord webhook error {e.code}: {e.read()}')
+    except Exception as e:
+      print(f'Discord webhook exception: {e}')
 
 
 async def main():

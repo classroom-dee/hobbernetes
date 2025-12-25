@@ -6,6 +6,8 @@ permissions:
 
 on:
   push:
+    branches:
+      - "main"
     tags:
       - "*"
 
@@ -36,7 +38,21 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v4
         with:
-          ref: main
+          fetch-depth: 0
+        #   ref: main
+
+      - name: Decide target branch
+        run: |
+          if startsWith "${GITHUB_REF}" "refs/tags/"; then
+            echo "TARGET_BRANCH=release" >> "$GITHUB_ENV"
+          else
+            echo "TARGET_BRANCH=main" >> "$GITHUB_ENV"
+          fi
+
+      - name: Switch/create target branch, starting from target commit
+        run: |
+          set -euo pipefail
+          git checkout -B "$TARGET_BRANCH" "$GITHUB_SHA"
 
       - name: "Use workload federation to authenticate"
         uses: google-github-actions/auth@v2
@@ -149,6 +165,8 @@ jobs:
             redis=redis:7 \
             backup=gcr.io/google.com/cloudsdktool/google-cloud-cli:stable
 
+          echo "NS=$ns" >> $GITHUB_ENV
+
           gcloud projects add-iam-policy-binding "${{ env.PROJECT_ID }}" \
             --member="serviceAccount:${{ env.PROJECT_NUMBER }}-compute@developer.gserviceaccount.com" \
             --role="roles/artifactregistry.reader"
@@ -162,10 +180,6 @@ jobs:
               iam.gke.io/gcp-service-account: "${{ env.GSA_ID }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
           EOF
 
-          kubectl create secret generic discord-hook \
-            --from-literal=discord_hook="${{ env.DISCORD_HOOK_URL }}" \
-            --dry-run=client -o yaml | kubectl apply -f -
-
           # kustomize edit add annotation iam.gke.io/gcp-service-account:"${{ env.GSA_ID }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
 
           # kustomize build . | kubectl apply -f -
@@ -173,11 +187,34 @@ jobs:
           # kubectl -n "$ns" get services -o wide
           # kubectl -n "$ns" get ing
 
-      - name: Commit back to main
+      - name: Production?
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+
+          kubectl create secret generic discord-hook \
+            --from-literal=discord_hook="${{ env.DISCORD_HOOK_URL }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          cd simple_http/overlays/prod
+          kustomize edit set namespace "$NS-prod"
+
+      - name: Staging?
+        if: github.ref == 'refs/heads/main'
+        run: |
+
+          kubectl create secret generic discord-hook \
+            --from-literal=discord_hook="dev://" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          cd simple_http/overlays/staging
+          kustomize edit set namespace "$NS-stage"
+
+      - name: Commit
         uses: EndBug/add-and-commit@v9
         with:
           message: New Simple Http Release ${{ github.sha }} [skip ci]
           add: "."
+          branch: ${{ env.TARGET_BRANCH }}
 
   cleanup:
     name: Cleanup namespace on delete

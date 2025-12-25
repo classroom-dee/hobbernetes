@@ -54,4 +54,5 @@
 - [4.6 The project, step 23](https://github.com/classroom-dee/hobbernetes/tree/4.6/simple_http)
 - [4.7 Baby steps to GitOps](https://github.com/classroom-dee/hobbernetes/tree/4.7/log_output)
 - [4.8 The project, step 24](https://github.com/classroom-dee/hobbernetes/tree/4.8/simple_http)
+- [4.9 The project, step 25](https://github.com/classroom-dee/hobbernetes/tree/4.9/simple_http)
 ## Chapter 05
