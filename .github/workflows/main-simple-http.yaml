@@ -218,7 +218,7 @@ jobs:
           message: New Simple Http Release ${{ github.sha }} [skip ci]
           add: "."
           new_branch: ${{ env.TARGET_BRANCH }}
-          push: "origin ${{ env.TARGET_BRANCH }} --set-upstream"
+          push: "origin ${{ env.TARGET_BRANCH }} --force --set-upstream"
 
   cleanup:
     name: Cleanup namespace on delete
