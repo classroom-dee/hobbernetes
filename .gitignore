@@ -10,3 +10,4 @@ Cargo.lock
 **/output
 hadolint
 mooc_SA.json
+gha-*

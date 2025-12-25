@@ -1,5 +1,5 @@
 <p align="center"> 
-    <a href="#"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/classroom-dee/hobbernetes/main.yaml?label=Release"></a> 
+    <a href="#"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/classroom-dee/hobbernetes/main-simple-http.yaml?label=Release"></a> 
     <a href="#"><img alt="Coverage" src="https://img.shields.io/codecov/c/github/classroom-dee/hobbernetes"></a> 
     <a href="#"><img alt="Release" src="https://img.shields.io/github/v/release/classroom-dee/hobbernetes"></a> 
 </p>
