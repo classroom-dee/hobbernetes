@@ -43,9 +43,9 @@ resources:
   - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/pod-monitor.yaml
   - https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.9/simple_http/manifests/ksa.yaml
 
-# Should be relative to overlays/prod and overlays/staging
 patches:
-  - path: ./../../patch-sa.yaml
+  # Path should be relative to the kustomization file containing the patch
+  - path: patch-sa.yaml
     target:
       kind: ServiceAccount
       name: gcs-sa

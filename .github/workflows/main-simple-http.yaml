@@ -157,7 +157,7 @@ jobs:
             # --from-file=key.json \
             # --dry-run=client -o yaml | kubectl apply -f -
 
-          cd simple_http
+          cd simple_http/base
           kustomize edit set namespace "$ns"
           kustomize edit set image \
             cron=$CRON_TAG \

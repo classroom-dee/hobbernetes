@@ -1,6 +1,8 @@
 ## The Project 4.9
-### Usage
+### What
+- Deploys to release, if tag-based push otherwise, to main
 
+### Usage
 1. Start the cluster, fork this repo and start ArgoCD, patch it to use LB, 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/boolYikes/hobbernetes/4.9/gcloud_scripts/cluster_init.sh | bash
