@@ -39,7 +39,7 @@ jobs:
           ref: main
 
       - name: "Fetch and checkout tag"
-        run: git fetch --tags && git checkout ${{ github.ref }}
+        run: git fetch --tags && git checkout ${{ github.ref }} && git switch main
 
       - name: "Use workload federation to authenticate"
         uses: google-github-actions/auth@v2
@@ -89,10 +89,10 @@ jobs:
 
       - name: "Publish"
         run: |
-          docker push $CRON_TAG
-          docker push $API_TAG
-          docker push $STATIC_TAG
-          docker push $BROADCASTER_TAG
+          docker push -q $CRON_TAG
+          docker push -q $API_TAG
+          docker push -q $STATIC_TAG
+          docker push -q $BROADCASTER_TAG
 
       - name: "Set up Kustomize"
         uses: imranismail/setup-kustomize@v2.1.0
