@@ -2,3 +2,11 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: simpe-http-stage-stset
+spec:
+  template:
+    spec:
+      containers:
+        - name: simple-http-api
+          env:
+            - name: PG_SVC_NAME
+              value: stage-simple-http-pg-svc

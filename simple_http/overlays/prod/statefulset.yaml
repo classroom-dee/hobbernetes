@@ -4,3 +4,10 @@ metadata:
   name: simpe-http-prod-stset
 spec:
   replicas: 3
+  template:
+    spec:
+      containers:
+        - name: simple-http-api
+          env:
+            - name: PG_SVC_NAME
+              value: prod-simple-http-pg-svc

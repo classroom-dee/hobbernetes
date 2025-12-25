@@ -15,7 +15,7 @@ patch_psycopg()
 def get_conn():
   conn = psycopg2.connect(
     # OR fully qualified: simple-http-pg-svc.project.svc.cluster.local
-    host='simple-http-pg-svc',
+    host=os.getenv('PG_SVC_NAME', 'Placeholder').strip(),
     port=5432,
     user=os.getenv('POSTGRES_USER', 'Placeholder').strip(),
     password=os.getenv('POSTGRES_PASSWORD', 'Placeholder').strip(),

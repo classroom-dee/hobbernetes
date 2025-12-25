@@ -195,7 +195,7 @@ jobs:
         run: |
           kubectl create namespace "$NS-prod"
 
-          kubectl create secret generic discord-hook \
+          kubectl create secret -n "$NS-prod" generic discord-hook \
             --from-literal=discord_hook="${{ env.DISCORD_HOOK_URL }}" \
             --dry-run=client -o yaml | kubectl apply -f -
 
@@ -207,7 +207,7 @@ jobs:
         run: |
           kubectl create namespace "$NS-stage"
 
-          kubectl create secret generic discord-hook \
+          kubectl create secret -n "$NS-prod" generic discord-hook \
             --from-literal=discord_hook="dev://" \
             --dry-run=client -o yaml | kubectl apply -f -
 

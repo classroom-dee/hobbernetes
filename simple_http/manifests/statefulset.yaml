@@ -106,6 +106,8 @@ spec:
               path: /ready
               port: 8061
           env:
+            - name: PG_SVC_NAME
+              value: placeholder
             - name: REDIS_URL
               valueFrom:
                 secretKeyRef:
