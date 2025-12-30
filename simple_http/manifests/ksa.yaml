@@ -1,8 +1,0 @@
-# for gcs control
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: gcs-sa
-  namespace: project
-  annotations:
-    iam.gke.io/gcp-service-account: ""

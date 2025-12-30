@@ -51,8 +51,8 @@ async def main():
     # Send message to the Discord channel (post_to_discord is blocking)
     await loop.run_in_executor(None, post_to_discord, DISCORD_HOOK_URL, content)
 
-  await nc.subscribe(NATS_SUBJECT_TODO_ADDED, cb=handler)
-  await nc.subscribe(NATS_SUBJECT_TODO_DONE, cb=handler)
+  await nc.subscribe(NATS_SUBJECT_TODO_ADDED, queue='added', cb=handler)
+  await nc.subscribe(NATS_SUBJECT_TODO_DONE, queue='done', cb=handler)
 
   try:
     await asyncio.Event().wait()

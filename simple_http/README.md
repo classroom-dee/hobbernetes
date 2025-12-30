@@ -1,11 +1,11 @@
-## The Project 4.9
+## The Project 4.10
 ### What
 - Deploys to release, if tag-based push otherwise, to main
 
 ### Usage
-1. Start the cluster, fork this repo and start ArgoCD, patch it to use LB, install prom and NATS
+1. Start the cluster, fork this repo and the [config repo](https://github.com/classroom-dee/simple-http-ops) and start ArgoCD, patch it to use LB, install prom and NATS
 ```bash
-curl -fsSL https://raw.githubusercontent.com/boolYikes/hobbernetes/4.9/gcloud_scripts/cluster_init.sh | bash
+curl -fsSL https://raw.githubusercontent.com/boolYikes/hobbernetes/4.10/gcloud_scripts/cluster_init.sh | bash
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
@@ -36,6 +36,7 @@ helm install \
 - Insert project number -> `principal://iam.googleapis.com/projects/<project number>/locations/global/workloadIdentityPools/github-actions-pool/subject/SUBJECT_ATTRIBUTE_VALUE`
 - Bind the above fed principal to your SA (impersonation) with `Workload Identity User` role
 - These vars must be present in github secrets
+- `CONFIG_REPO_TOKEN` -> A fine grained token with access to the config repo content & PR read/write
 - `GKE_PROJECT` -> project id
 - `GKE_PROJECT_NAME`
 - `GKE_PROJECT_NUMBER`
@@ -49,14 +50,17 @@ helm install \
 
 4. Github
 - Check workflow permissions (RW)
+- The workflow uses Github environment named **yap**
 
-5. On ArgoCD, add new app, set PATH to either `simple_http/overlays/prod/kustomization.yaml` or `.../staging/kustomization.yaml`, namespace to `project-4-9-prod` or if staging, `project-stage`, sync and see it progress.
+5. On ArgoCD, add prod and staging apps. The repo/kustomize path are: `simple-http-ops/overlays/prod/kustomization.yaml` and `simple-http-ops/overlays/staging/kustomization.yaml` respectively. And set namespaces to `project-4-10-prod` or if staging, `project-stage`, sync and see it progress.
 
-6. make modifications, force push tag `4.9` with commit message `[simple-http]`, and re-sync, if there was a previous run, delete the pod to refresh.
+6. Make modifications to the source repo, force push tag `4.10`, check PR in the [config repo](https://github.com/classroom-dee/simple-http-ops), merge as you see fit.
 
-7. NATS feeds are printed in the pod log 
+7. Resync ArgoCD apps. If there was a previous run, delete the pod to refresh(it might try to use old images despite the `kubectl describe` saying it is using the correct image). Do the same with the main branch for staging environment.
 
-8. Delete cluster once done
+8. NATS feeds are printed in the pod log 
+
+9. Delete cluster once done
 ```bash
-curl -fsSL https://raw.githubusercontent.com/boolYikes/hobbernetes/4.9/gcloud_scripts/delete_cluster.sh | bash
+curl -fsSL https://raw.githubusercontent.com/boolYikes/hobbernetes/4.10/gcloud_scripts/delete_cluster.sh | bash
 ```

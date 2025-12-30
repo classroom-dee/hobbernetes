@@ -1,207 +1,207 @@
-name: Log-output release final
+# name: Log-output release final
 
-permissions:
-  contents: write
-  id-token: write
+# permissions:
+#   contents: write
+#   id-token: write
 
-on:
-  push:
-    # branches:
-    #   - main
-    #   - "**"
-    tags:
-      - "*"
+# on:
+#   push:
+#     # branches:
+#     #   - main
+#     #   - "**"
+#     tags:
+#       - "*"
 
-  delete:
-    branches:
-      - "**"
+#   delete:
+#     branches:
+#       - "**"
 
-env:
-  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
-  PROJECT_NAME: ${{ secrets.GKE_PROJECT_NAME }}
-  PROJECT_NUMBER: ${{ secrets.GKE_PROJECT_NUMBER }}
-  GSA_ID: ${{ secrets.GSA_ID }}
-  GKE_CLUSTER: dwk-cluster
-  GKE_ZONE: europe-north1-b
-  REGISTRY: europe-north1-docker.pkg.dev
-  REPOSITORY: test-repo
-  GSA: ${{ secrets.GKE_PROJECT_NAME }}@${{ secrets.GKE_PROJECT }}.iam.gserviceaccount.com
+# env:
+#   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+#   PROJECT_NAME: ${{ secrets.GKE_PROJECT_NAME }}
+#   PROJECT_NUMBER: ${{ secrets.GKE_PROJECT_NUMBER }}
+#   GSA_ID: ${{ secrets.GSA_ID }}
+#   GKE_CLUSTER: dwk-cluster
+#   GKE_ZONE: europe-north1-b
+#   REGISTRY: europe-north1-docker.pkg.dev
+#   REPOSITORY: test-repo
+#   GSA: ${{ secrets.GKE_PROJECT_NAME }}@${{ secrets.GKE_PROJECT }}.iam.gserviceaccount.com
 
-jobs:
-  build-publish-deploy:
-    # branching would have been cleaner. now it starts two workflows albeit short
-    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[log-output]')
-    name: Build, Publish and Deploy
-    runs-on: ubuntu-latest
-    environment: yap
+# jobs:
+#   build-publish-deploy:
+#     # branching would have been cleaner. now it starts two workflows albeit short
+#     if: github.event_name == 'push' && contains(github.event.head_commit.message, '[log-output]')
+#     name: Build, Publish and Deploy
+#     runs-on: ubuntu-latest
+#     environment: yap
 
-    steps:
-      - name: "Checkout"
-        uses: actions/checkout@v4
-        with:
-          ref: main
+#     steps:
+#       - name: "Checkout"
+#         uses: actions/checkout@v4
+#         with:
+#           ref: main
 
-      - name: "Use workload federation to authenticate"
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: "projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider"
-          service_account: "${{ env.GSA_ID }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
-          persist-credentials: true
+#       - name: "Use workload federation to authenticate"
+#         uses: google-github-actions/auth@v2
+#         with:
+#           workload_identity_provider: "projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider"
+#           service_account: "${{ env.GSA_ID }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
+#           persist-credentials: true
 
-      - name: "Set up Cloud SDK"
-        uses: google-github-actions/setup-gcloud@v2
+#       - name: "Set up Cloud SDK"
+#         uses: google-github-actions/setup-gcloud@v2
 
-      - name: "Use gcloud CLI"
-        run: gcloud info
+#       - name: "Use gcloud CLI"
+#         run: gcloud info
 
-      - name: "Use Artifact Registry instead of Docker Hub"
-        run: gcloud --quiet auth configure-docker $REGISTRY
-        env:
-          REGISTRY: europe-north1-docker.pkg.dev
+#       - name: "Use Artifact Registry instead of Docker Hub"
+#         run: gcloud --quiet auth configure-docker $REGISTRY
+#         env:
+#           REGISTRY: europe-north1-docker.pkg.dev
 
-      - name: "Get GKE credentials"
-        uses: "google-github-actions/get-gke-credentials@v2"
-        with:
-          cluster_name: "${{ env.GKE_CLUSTER }}"
-          project_id: "${{ env.PROJECT_ID }}"
-          location: "${{ env.GKE_ZONE }}"
+#       - name: "Get GKE credentials"
+#         uses: "google-github-actions/get-gke-credentials@v2"
+#         with:
+#           cluster_name: "${{ env.GKE_CLUSTER }}"
+#           project_id: "${{ env.PROJECT_ID }}"
+#           location: "${{ env.GKE_ZONE }}"
 
-      - name: "Set image names"
-        run: |
-          ref="${GITHUB_REF_NAME:-${GITHUB_HEAD_REF:-${GITHUB_REF#refs/*/}}}"
-          ref_safe="$(echo "$ref" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_.-]+/-/g' | sed -E 's/^-+|-+$//g')"
-          short_sha="${GITHUB_SHA::7}"
-          echo "DEBUG: ref name: $ref_safe, sha: $short_sha"
-          echo "LOGGER_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/logger:$ref_safe-$short_sha" >> $GITHUB_ENV
-          echo "FETCHER_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/fetcher:$ref_safe-$short_sha" >> $GITHUB_ENV
-          echo "PINGPONG_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/pingpong:$ref_safe-$short_sha" >> $GITHUB_ENV
+#       - name: "Set image names"
+#         run: |
+#           ref="${GITHUB_REF_NAME:-${GITHUB_HEAD_REF:-${GITHUB_REF#refs/*/}}}"
+#           ref_safe="$(echo "$ref" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_.-]+/-/g' | sed -E 's/^-+|-+$//g')"
+#           short_sha="${GITHUB_SHA::7}"
+#           echo "DEBUG: ref name: $ref_safe, sha: $short_sha"
+#           echo "LOGGER_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/logger:$ref_safe-$short_sha" >> $GITHUB_ENV
+#           echo "FETCHER_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/fetcher:$ref_safe-$short_sha" >> $GITHUB_ENV
+#           echo "PINGPONG_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/pingpong:$ref_safe-$short_sha" >> $GITHUB_ENV
 
-      - name: "Build"
-        run: |
-          docker build -q -f ./log_output/logger.Dockerfile --tag $LOGGER_TAG ./log_output
-          docker build -q -f ./log_output/fetcher.Dockerfile --tag $FETCHER_TAG ./log_output
-          docker build -q -f ./ping_pong/Dockerfile --tag $PINGPONG_TAG ./ping_pong
+#       - name: "Build"
+#         run: |
+#           docker build -q -f ./log_output/logger.Dockerfile --tag $LOGGER_TAG ./log_output
+#           docker build -q -f ./log_output/fetcher.Dockerfile --tag $FETCHER_TAG ./log_output
+#           docker build -q -f ./ping_pong/Dockerfile --tag $PINGPONG_TAG ./ping_pong
 
-      - name: "Publish"
-        run: |
-          docker push $LOGGER_TAG
-          docker push $FETCHER_TAG
-          docker push $PINGPONG_TAG
+#       - name: "Publish"
+#         run: |
+#           docker push $LOGGER_TAG
+#           docker push $FETCHER_TAG
+#           docker push $PINGPONG_TAG
 
-      - name: "Set up Kustomize"
-        uses: imranismail/setup-kustomize@v2.1.0
+#       - name: "Set up Kustomize"
+#         uses: imranismail/setup-kustomize@v2.1.0
 
-      - name: Deploy
-        run: |
-          set -euo pipefail
+#       - name: Deploy
+#         run: |
+#           set -euo pipefail
 
-          ref="${GITHUB_REF_NAME:-${GITHUB_HEAD_REF:-${GITHUB_REF#refs/*/}}}"
-          ref_lower="$(echo "$ref" | tr '[:upper:]' '[:lower:]')"
+#           ref="${GITHUB_REF_NAME:-${GITHUB_HEAD_REF:-${GITHUB_REF#refs/*/}}}"
+#           ref_lower="$(echo "$ref" | tr '[:upper:]' '[:lower:]')"
 
-          ns=""
-          if [ "${GITHUB_REF_TYPE:-branch}" = "branch" ]; then
-            if [[ "$ref_lower" =~ ^(main|master)$ ]]; then
-              ns="exercises"
-            else
-              ns="exercises-$ref_lower"
-            fi
-          else
-            git fetch --quiet --deepen=100 || true
-            git fetch --quiet origin "+refs/heads/*:refs/remotes/origin/*"
-            if git branch -r --contains "$GITHUB_SHA" | grep -qE 'origin/(main|master)'; then
-              ns="exercises"
-            else
-              ns="exercises-$ref_lower"
-            fi
-          fi
+#           ns=""
+#           if [ "${GITHUB_REF_TYPE:-branch}" = "branch" ]; then
+#             if [[ "$ref_lower" =~ ^(main|master)$ ]]; then
+#               ns="exercises"
+#             else
+#               ns="exercises-$ref_lower"
+#             fi
+#           else
+#             git fetch --quiet --deepen=100 || true
+#             git fetch --quiet origin "+refs/heads/*:refs/remotes/origin/*"
+#             if git branch -r --contains "$GITHUB_SHA" | grep -qE 'origin/(main|master)'; then
+#               ns="exercises"
+#             else
+#               ns="exercises-$ref_lower"
+#             fi
+#           fi
 
-          ns="${ns//\//-}"
-          ns="${ns//_/-}"
-          ns="$(echo "$ns" | sed -E 's/[^a-z0-9-]+/-/g')"
-          ns="$(echo "$ns" | sed -E 's/^-+//; s/-+$//; s/-{2,}/-/g')"
-          ns="${ns:0:63}"; ns="${ns%-}"
+#           ns="${ns//\//-}"
+#           ns="${ns//_/-}"
+#           ns="$(echo "$ns" | sed -E 's/[^a-z0-9-]+/-/g')"
+#           ns="$(echo "$ns" | sed -E 's/^-+//; s/-+$//; s/-{2,}/-/g')"
+#           ns="${ns:0:63}"; ns="${ns%-}"
 
-          echo "Using namespace: $ns"
+#           echo "Using namespace: $ns"
 
-          kubectl create namespace "$ns" >/dev/null 2>&1 || true
-          kubectl config set-context --current --namespace="$ns"
+#           kubectl create namespace "$ns" >/dev/null 2>&1 || true
+#           kubectl config set-context --current --namespace="$ns"
 
-          cd log_output
-          kustomize edit set namespace "$ns"
-          kustomize edit set image \
-            LOGGER/IMAGE=$LOGGER_TAG \
-            FETCHER/IMAGE=$FETCHER_TAG \
-            PINGPONG/IMAGE=$PINGPONG_TAG \
-            PINGPONG-DB/IMAGE=postgres:13
+#           cd log_output
+#           kustomize edit set namespace "$ns"
+#           kustomize edit set image \
+#             LOGGER/IMAGE=$LOGGER_TAG \
+#             FETCHER/IMAGE=$FETCHER_TAG \
+#             PINGPONG/IMAGE=$PINGPONG_TAG \
+#             PINGPONG-DB/IMAGE=postgres:13
 
-      - name: Commit Kustomization Back to Ref
-        uses: EndBug/add-and-commit@v9
-        with:
-          add: "log_output/kustomization.yaml"
-          message: New version released ${{ github.sha }} [skip ci]
+#       - name: Commit Kustomization Back to Ref
+#         uses: EndBug/add-and-commit@v9
+#         with:
+#           add: "log_output/kustomization.yaml"
+#           message: New version released ${{ github.sha }} [skip ci]
 
-      # - name: Push tag
-      #   run: |
-      #     git tag -f 4.7
-      #     git push origin -f 4.7
+#       # - name: Push tag
+#       #   run: |
+#       #     git tag -f 4.7
+#       #     git push origin -f 4.7
 
-  cleanup:
-    name: Cleanup namespace on delete
-    runs-on: ubuntu-latest
-    if: github.event_name == 'delete' && contains(github.event.head_commit.message, '[log-output]')
-    environment: yap
-    steps:
-      - name: "Use workload federation to authenticate"
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: "projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider"
-          service_account: "${{ env.GSA_ID }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
+#   cleanup:
+#     name: Cleanup namespace on delete
+#     runs-on: ubuntu-latest
+#     if: github.event_name == 'delete' && contains(github.event.head_commit.message, '[log-output]')
+#     environment: yap
+#     steps:
+#       - name: "Use workload federation to authenticate"
+#         uses: google-github-actions/auth@v2
+#         with:
+#           workload_identity_provider: "projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider"
+#           service_account: "${{ env.GSA_ID }}@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
 
-      - name: "Set up Cloud SDK"
-        uses: google-github-actions/setup-gcloud@v2
+#       - name: "Set up Cloud SDK"
+#         uses: google-github-actions/setup-gcloud@v2
 
-      - name: "Get GKE credentials"
-        uses: "google-github-actions/get-gke-credentials@v2"
-        with:
-          cluster_name: "${{ env.GKE_CLUSTER }}"
-          project_id: "${{ env.PROJECT_ID }}"
-          location: "${{ env.GKE_ZONE }}"
+#       - name: "Get GKE credentials"
+#         uses: "google-github-actions/get-gke-credentials@v2"
+#         with:
+#           cluster_name: "${{ env.GKE_CLUSTER }}"
+#           project_id: "${{ env.PROJECT_ID }}"
+#           location: "${{ env.GKE_ZONE }}"
 
-      - name: "Delete namespace"
-        env:
-          REF: ${{ github.event.ref }}
-          REF_TYPE: ${{ github.event.ref_type }}
-        run: |
-          set -euo pipefail
+#       - name: "Delete namespace"
+#         env:
+#           REF: ${{ github.event.ref }}
+#           REF_TYPE: ${{ github.event.ref_type }}
+#         run: |
+#           set -euo pipefail
 
-          ref_lower="$(echo "${REF}" | tr '[:upper:]' '[:lower:]')"
+#           ref_lower="$(echo "${REF}" | tr '[:upper:]' '[:lower:]')"
 
-          if [[ "${REF_TYPE}" != "branch" ]]; then
-            echo "Not a branch delete; skipping."
-            exit 0
-          fi
+#           if [[ "${REF_TYPE}" != "branch" ]]; then
+#             echo "Not a branch delete; skipping."
+#             exit 0
+#           fi
 
-          if [[ "${ref_lower}" =~ ^(main|master)$ ]]; then
-            ns="exercises"
-          else
-            ns="exercises-$ref_lower"
-          fi
+#           if [[ "${ref_lower}" =~ ^(main|master)$ ]]; then
+#             ns="exercises"
+#           else
+#             ns="exercises-$ref_lower"
+#           fi
 
-          ns="${ns//\//-}"
-          ns="${ns//_/-}"
-          ns="$(echo "$ns" | sed -E 's/[^a-z0-9-]+/-/g; s/^-+//; s/-+$//; s/-{2,}/-/g')"
-          ns="${ns:0:63}"; ns="${ns%-}"
+#           ns="${ns//\//-}"
+#           ns="${ns//_/-}"
+#           ns="$(echo "$ns" | sed -E 's/[^a-z0-9-]+/-/g; s/^-+//; s/-+$//; s/-{2,}/-/g')"
+#           ns="${ns:0:63}"; ns="${ns%-}"
 
-          if [[ "$ns" == "exercises" ]]; then
-            echo "Ref '${REF}' maps to 'exercises' (main/master). Skipping."
-            exit 0
-          fi
+#           if [[ "$ns" == "exercises" ]]; then
+#             echo "Ref '${REF}' maps to 'exercises' (main/master). Skipping."
+#             exit 0
+#           fi
 
-          echo "Deleting namespace: $ns"
-          kubectl get ns "$ns" >/dev/null 2>&1 && kubectl get all -n "$ns" || true
+#           echo "Deleting namespace: $ns"
+#           kubectl get ns "$ns" >/dev/null 2>&1 && kubectl get all -n "$ns" || true
 
-          kubectl delete namespace "$ns" --ignore-not-found=true --wait=false
+#           kubectl delete namespace "$ns" --ignore-not-found=true --wait=false
 
-          kubectl delete namespace "$ns" --ignore-not-found >/dev/null 2>&1 || true
+#           kubectl delete namespace "$ns" --ignore-not-found >/dev/null 2>&1 || true
 
-          kubectl get ns "$ns" || echo "Namespace '$ns' not found (deleted or terminating)."
+#           kubectl get ns "$ns" || echo "Namespace '$ns' not found (deleted or terminating)."

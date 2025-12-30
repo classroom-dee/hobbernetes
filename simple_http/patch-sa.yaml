@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: gcs-sa
-  annotations:
-    iam.gke.io/gcp-service-account: "mooc-gke-2025@project-44f50a83-ee46-46c4-a3d.iam.gserviceaccount.com"
