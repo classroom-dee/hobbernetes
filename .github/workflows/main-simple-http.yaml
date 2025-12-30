@@ -216,6 +216,8 @@ jobs:
 
       - name: Commit changes
         working-directory: config-repo
+        env:
+          GH_TOKEN: ${{ env.CONFIG_REPO_TOKEN }}
         run: |
           if [ -z "$(git status --porcelain)" ]; then
             echo "No changes to commit."
