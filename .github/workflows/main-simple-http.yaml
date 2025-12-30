@@ -221,6 +221,9 @@ jobs:
             echo "No changes to commit."
             exit 0
           fi
+          useremail="$(gh api user/emails --jq '(.[] | select(.email | contains("noreply")).email) // (.[] | select(.primary).email)')"
+          git config --global user.email "$useremail" 
+          git config --global user.name "simple-http-ops-bot"
           git checkout -b promote-${{ github.sha }}
           git add .
           git commit -m "Promote app to ${{ github.sha }}"
