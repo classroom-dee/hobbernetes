@@ -57,3 +57,6 @@
 - [4.9 The project, step 25](https://github.com/classroom-dee/hobbernetes/tree/4.9/simple_http)
 - [4.10 The project, the grande finale](https://github.com/classroom-dee/hobbernetes/tree/4.10/simple_http)
 ## Chapter 05
+- Summary
+## Chapter 06
+- [5.1 DIY CRD & Controller](https://github.com/classroom-dee/hobbernetes/tree/5.1/chapter6/diy-crd)

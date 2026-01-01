@@ -1,0 +1,7 @@
+apiVersion: stable.dwk/v1
+kind: DummySite
+metadata:
+  name: copy-paster
+spec:
+  website_url: https://en.wikipedia.org/wiki/Giant_panda
+  image: xuanminator/dummysite-app:5.1
