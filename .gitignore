@@ -11,3 +11,4 @@ Cargo.lock
 hadolint
 mooc_SA.json
 gha-*
+istio-*/
