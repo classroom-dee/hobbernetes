@@ -4,7 +4,8 @@ metadata:
   name: log-output-gateway
   namespace: exercises
 spec:
-  selector: ingressgateway
+  selector:
+    istio: ingressgateway
   servers:
     - port:
         name: http

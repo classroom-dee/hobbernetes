@@ -11,7 +11,7 @@ spec:
     # greeter
     - match:
         - uri:
-          prefix: /greet
+            prefix: /greet
       rewrite:
         uri: /
       route:
