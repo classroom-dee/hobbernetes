@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: exercises
+  name: greeter-dep-v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: greeter
+      version: v1
+  template:
+    metadata:
+      namespace: exercises
+      labels:
+        app: greeter
+        version: v1
+    spec:
+      containers:
+        # greeter
+        - name: log-output-greeter-v1
+          image: GREETERv1/IMAGE
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MESSAGE
+              value: "hyva ole v1"
+          resources:
+            requests:
+              cpu: "30m"
+              memory: "64Mi"
+            limits:
+              cpu: "60m"
+              memory: "64Mi"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: exercises
+  name: greeter-dep-v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: greeter
+      version: v2
+  template:
+    metadata:
+      namespace: exercises
+      labels:
+        app: greeter
+        version: v2
+    spec:
+      containers:
+        # greeter
+        - name: log-output-greeter-v2
+          image: GREETERv2/IMAGE
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MESSAGE
+              value: "hyva ole v2"
+          resources:
+            requests:
+              cpu: "30m"
+              memory: "64Mi"
+            limits:
+              cpu: "60m"
+              memory: "64Mi"

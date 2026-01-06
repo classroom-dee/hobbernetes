@@ -21,7 +21,7 @@ class LogsReqHandler(BaseHTTPRequestHandler):
     elif self.path == '/all':
       logs = load_logs()
       response = json.dumps(logs, indent=2).encode('utf-8')
-      ping = requests.get('http://ping-pong-svc/pings')
+      ping = requests.get('http://ping-pong-svc/pingpong/pings')
       if ping.json():
         self.send_response(200)
         self.send_header('Content-Type', 'application/json')
@@ -36,11 +36,15 @@ class LogsReqHandler(BaseHTTPRequestHandler):
       # ping_count = len(get_pings()) # File-based method
       ping_count = 0
       try:
-        resp = requests.get('http://ping-pong-svc/pings')
+        resp = requests.get('http://ping-pong-svc/pingpong/pings')
         data = resp.json()  # { count: n }
         ping_count = data.get('count', 0)
 
-        log = ping_log('INFO', f'Counts: {ping_count}')
+        # insert greeter request here
+        greeting = requests.get('http://greeter-svc/greet/message')
+        greeting_message = greeting.json().get('greeting', '')
+
+        log = ping_log('INFO', greeting_message)
         response = f'{log}\nPing / Pongs: {ping_count}'
 
         self.send_response(200)

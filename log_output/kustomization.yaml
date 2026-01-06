@@ -1,28 +1,33 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+# just for testing,
+# the two greeters are basically the same images. they get diff messages from their respective deps
 images:
-- name: FETCHER/IMAGE
-  newName: europe-north1-docker.pkg.dev/project-44f50a83-ee46-46c4-a3d/test-repo/fetcher
-  newTag: 4.7-7948aff
-- name: LOGGER/IMAGE
-  newName: europe-north1-docker.pkg.dev/project-44f50a83-ee46-46c4-a3d/test-repo/logger
-  newTag: 4.7-7948aff
-- name: PINGPONG-DB/IMAGE
-  newName: postgres
-  newTag: "13"
-- name: PINGPONG/IMAGE
-  newName: europe-north1-docker.pkg.dev/project-44f50a83-ee46-46c4-a3d/test-repo/pingpong
-  newTag: 4.7-7948aff
+  - name: FETCHER/IMAGE
+    newName: xuanminator/log_output_fetcher:5.3
+  - name: LOGGER/IMAGE
+    newName: xuanminator/log_output_logger:5.3
+  - name: GREETERv1/IMAGE
+    newName: xuanminator/log_output_greeter:5.3.1
+  - name: GREETERv2/IMAGE
+    newName: xuanminator/log_output_greeter:5.3.2
+  - name: PINGPONG-DB/IMAGE
+    newName: postgres:13
+  - name: PINGPONG/IMAGE
+    newName: xuanminator/ping-pong:5.3
 
 resources:
-- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.7/log_output/volumes/pvc.yaml
-- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.7/log_output/volumes/configmap.yaml
-- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.7/log_output/manifests/deployment.yaml
-- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.7/log_output/manifests/service.yaml
-- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.7/ping_pong/manifests/secrets.yaml
-- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.7/ping_pong/manifests/statefulset.yaml
-- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.7/ping_pong/manifests/service.yaml
-- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.7/log_output/manifests/gateway.yaml
-- https://raw.githubusercontent.com/classroom-dee/hobbernetes/4.7/log_output/manifests/httproute.yaml
-namespace: exercises-4-7
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/log_output/volumes/pvc.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/log_output/volumes/configmap.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/log_output/manifests/deployment.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/log_output/manifests/greeter-dep.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/log_output/manifests/service.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/log_output/manifests/greeter-svc.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/ping_pong/manifests/secrets.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/ping_pong/manifests/statefulset.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/ping_pong/manifests/service.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/log_output/manifests/gateway.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/log_output/manifests/virtualservice.yaml
+
+namespace: exercises

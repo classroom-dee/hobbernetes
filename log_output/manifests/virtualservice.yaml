@@ -1,0 +1,51 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: log-output-vs
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - log-output-gateway
+  http:
+    # greeter
+    - match:
+        - uri:
+          prefix: /greet
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: greeter-svc-1
+            port:
+              number: 80
+          weight: 75
+        - destination:
+            host: greeter-svc-2
+            port:
+              number: 80
+          weight: 25
+
+    # pingpong
+    - match:
+        - uri:
+            prefix: /pingpong
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: ping-pong-svc
+            port:
+              number: 80
+
+    # logoutput
+    - match:
+        - uri:
+            prefix: /logs
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: log-output-svc
+            port:
+              number: 80
