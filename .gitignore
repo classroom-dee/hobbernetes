@@ -12,3 +12,4 @@ hadolint
 mooc_SA.json
 gha-*
 istio-*/
+kustomize

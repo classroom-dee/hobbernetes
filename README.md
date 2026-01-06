@@ -61,3 +61,4 @@
 ## Chapter 06
 - [5.1 DIY CRD & Controller](https://github.com/classroom-dee/hobbernetes/tree/5.1/chapter6/diy-crd)
 - [5.2 Getting started with Istio service mesh](https://github.com/classroom-dee/hobbernetes/tree/5.2/chapter6/service-mesh)
+- [5.3 Log app, the Service Mesh Edition](https://github.com/classroom-dee/hobbernetes/tree/5.3/log_output)

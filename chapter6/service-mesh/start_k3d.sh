@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 
 CLUSTER_NAME="k3s-default"
 CONFIG_NAME="k3d-k3s-default"
@@ -17,5 +15,3 @@ config_path=$(k3d kubeconfig merge "$CLUSTER_NAME")
 # Maybe only one of these is needed but I'm not sure
 export KUBECONFIG="$config_path"
 kubectl --kubeconfig "$config_path" config use-context "$CONFIG_NAME"
-
-kubectl get nodes
