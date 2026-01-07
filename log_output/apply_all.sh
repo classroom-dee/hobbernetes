@@ -31,8 +31,11 @@ EOF
 NS=exercises
 kubectl create namespace $NS
 
+# Enable injection
+kubectl label namespace exercises istio-injection=enabled
+
 echo "Manifests are applying..."
-./kustomize build kustomize build https://github.com/classroom-dee/hobbernetes//log_output?ref=5.3 | kubectl apply -f -
+./kustomize build https://github.com/classroom-dee/hobbernetes/log_output?ref=5.3 | kubectl apply -f -
 kubectl -n $NS rollout status deployment log-output-dep
 kubectl -n $NS get services -o wide
 kubectl -n $NS get ing
