@@ -27,7 +27,14 @@ async fn main() {
             move || get_pings(counter)
         }))
         .route("/pong", get(handler))
-        .layer(ServiceBuilder::new().layer(Extension(counter)));
+        .route("//pings", get({ // istio VS rewrite results in redundant slash. why python backends don't need this?
+            let counter = Arc::clone(&counter);
+            move || get_pings(counter)
+        }))
+        .route("//pong", get(handler))
+        .layer(ServiceBuilder::new().layer(Extension(counter)))
+        .fallback(|uri: axum::http::Uri| async move {format!("NO MATCH: {}", uri)});
+        
 
     let listener = TcpListener::bind("0.0.0.0:8089").await.unwrap();
     serve(listener, app).await.unwrap();

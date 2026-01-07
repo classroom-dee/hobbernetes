@@ -2,6 +2,7 @@ apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
   name: log-output-vs
+  namespace: exercises
 spec:
   hosts:
     - "*"
@@ -28,6 +29,17 @@ spec:
               number: 80
           weight: 25
 
+    # pingpong subpaths first. subpaths must come first or be overwritten
+    - match:
+        - uri:
+            prefix: /pingpong/
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: ping-pong-svc
+            port:
+              number: 80
     # pingpong
     - match:
         - uri:
