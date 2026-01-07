@@ -1,7 +1,6 @@
 ## Log Output 5.3
 ### Usage
 
-1. 
 1. Start the cluster & set kubeconfig `source <(curl -fsSL https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/chapter6/service-mesh/start_k3d.sh)`
 
 2. Install CLI: `source <(curl -fsSL https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/chapter6/service-mesh/install_istio.sh)`

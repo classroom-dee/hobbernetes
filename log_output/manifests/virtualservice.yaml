@@ -16,12 +16,14 @@ spec:
         uri: /
       route:
         - destination:
-            host: greeter-svc-1
+            host: greeter-svc
+            subset: v1-subset
             port:
               number: 80
           weight: 75
         - destination:
-            host: greeter-svc-2
+            host: greeter-svc
+            subset: v2-subset
             port:
               number: 80
           weight: 25

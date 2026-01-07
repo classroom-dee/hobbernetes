@@ -1,8 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# just for testing,
-# the two greeters are basically the same images. they get diff messages from their respective deps
 images:
   - name: FETCHER/IMAGE
     newName: xuanminator/log_output_fetcher:5.3
@@ -21,13 +19,14 @@ resources:
   - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/log_output/volumes/pvc.yaml
   - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/log_output/volumes/configmap.yaml
   - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/log_output/manifests/deployment.yaml
-  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/log_output/manifests/greeter-dep.yaml
   - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/log_output/manifests/service.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/log_output/manifests/greeter-deps.yaml
   - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/log_output/manifests/greeter-svc.yaml
   - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/ping_pong/manifests/secrets.yaml
   - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/ping_pong/manifests/statefulset.yaml
   - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/ping_pong/manifests/service.yaml
   - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/log_output/manifests/gateway.yaml
+  - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/log_output/manifests/destination-rules.yaml
   - https://raw.githubusercontent.com/classroom-dee/hobbernetes/5.3/log_output/manifests/virtualservice.yaml
 
 namespace: exercises
