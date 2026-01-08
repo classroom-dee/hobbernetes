@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: wiki-replicator-sts
+  namespace: wiki-replicator
+spec:
+  serviceName: wiki-replicator-headless
+  replicas: 2
+  selector:
+    matchLabels:
+      app: wiki-replicator
+  template:
+    metadata:
+      labels:
+        app: wiki-replicator
+      annotations:
+        traffic.sidecar.istio.io/excludeOutboundPorts: "443,53"
+    spec:
+      initContainers:
+        # init
+        - name: wiki-replicator-init
+          image: xuanminator/wiki-parser:5.4.1
+          env:
+            - name: URL
+              value: https://en.wikipedia.org/wiki/Kubernetes
+            - name: MIN_WAIT
+              value: "0"
+            - name: MAX_WAIT
+              value: "0"
+            - name: VOLUME_PATH
+              value: /shared-volume
+          volumeMounts:
+            - name: wiki-replicator-pv
+              mountPath: /shared-volume
+
+        # sidecar
+        - name: wiki-replicator-sidecar
+          image: xuanminator/wiki-parser:5.4.1
+          restartPolicy: Always
+          env:
+            - name: URL
+              value: https://en.wikipedia.org/wiki/Special:Random
+            - name: MIN_WAIT
+              value: "5"
+            - name: MAX_WAIT
+              value: "15"
+            - name: VOLUME_PATH
+              value: /shared-volume
+          volumeMounts:
+            - name: wiki-replicator-pv
+              mountPath: /shared-volume
+
+      # main
+      containers:
+        - name: wiki-replicator
+          image: nginx:alpine
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+          volumeMounts:
+            - name: wiki-replicator-pv
+              mountPath: /usr/share/nginx/html
+
+  volumeClaimTemplates:
+    - metadata:
+        name: wiki-replicator-pv
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 50Mi

@@ -1,0 +1,15 @@
+# allow egress for istio-proxy
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: allow-wikipedia
+  namespace: wiki-replicator
+spec:
+  hosts:
+    - en.wikipedia.org
+  ports:
+    - number: 443
+      name: https
+      protocol: TLS
+  resolution: DNS
+  location: MESH_EXTERNAL
