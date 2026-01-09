@@ -63,3 +63,5 @@
 - [5.2 Getting started with Istio service mesh](https://github.com/classroom-dee/hobbernetes/tree/5.2/chapter6/service-mesh)
 - [5.3 Log app, the Service Mesh Edition](https://github.com/classroom-dee/hobbernetes/tree/5.3/log_output)
 - [5.4 Wikipedia with init and sidecar](https://github.com/classroom-dee/hobbernetes/tree/5.4/chapter6/wiki-copy)
+- [5.5 Platform comparison]()
+- [5.6 Trying serverless](https://github.com/classroom-dee/hobbernetes/tree/5.6/chapter6/knative)

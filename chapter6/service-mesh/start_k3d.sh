@@ -5,8 +5,11 @@ CLUSTER_NAME="k3s-default"
 CONFIG_NAME="k3d-k3s-default"
 
 # coalesce cluster start/creation
-k3d cluster list | grep -q "^$CLUSTER_NAME\b" && k3d cluster start $CLUSTER_NAME || \
-  k3d cluster create --api-port 6550 -p '9080:80@loadbalancer' -p '9443:443@loadbalancer' --agents 2 --k3s-arg '--disable=traefik@server:*' $CLUSTER_NAME
+k3d cluster list | \
+  grep -q "^$CLUSTER_NAME\b" && \
+  k3d cluster start $CLUSTER_NAME || \
+  k3d cluster create -p 8082:30080@agent:0 -p 8081:80@loadbalancer \
+    --agents 2 --k3s-arg "--disable=traefik@server:0" $CLUSTER_NAME
 
 # k3d kubeconfig get $CLUSTER_NAME
 config_path=$(k3d kubeconfig merge "$CLUSTER_NAME")
