@@ -7,7 +7,7 @@ use axum::{
 };
 
 use serde_json::json;
-use std::{sync::{Arc, atomic::{Ordering, AtomicUsize}}};
+use std::{sync::{Arc, atomic::{Ordering, AtomicUsize}}, env};
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
 
@@ -35,8 +35,9 @@ async fn main() {
         .layer(ServiceBuilder::new().layer(Extension(counter)))
         .fallback(|uri: axum::http::Uri| async move {format!("NO MATCH: {}", uri)});
         
-
-    let listener = TcpListener::bind("0.0.0.0:8089").await.unwrap();
+    let port = env::var("PINGPONG_PORT").unwrap_or_else(|_| "8089".into());
+    let addr = format!("0.0.0.0:{}", port);
+    let listener = TcpListener::bind(&addr).await.unwrap();
     serve(listener, app).await.unwrap();
 }
 

@@ -5,7 +5,8 @@ pub async fn ping_logger(
     counter: Arc<AtomicUsize>,
 ) -> String {
     let count = counter.fetch_add(1, Ordering::SeqCst) + 1;
-
+    
+    let version = env::var("PINGPONG_VERSION").unwrap_or_else(|_| "V1".into());
     let user = env::var("DB_USER").unwrap_or_else(|_| "postgres".into());
     let pass = env::var("DB_PASS").unwrap_or_default();
     let host = env::var("DB_HOST").unwrap_or_else(|_| "127.0.0.1".into());
@@ -14,7 +15,6 @@ pub async fn ping_logger(
         .and_then(|p| p.parse().ok())
         .unwrap_or(5432);
     let dbname = env::var("DB_NAME").unwrap_or_else(|_| user.clone());
-
 
     let conn_str = format!(
         "host={} port={} user={} password={} dbname={}",
@@ -33,6 +33,7 @@ pub async fn ping_logger(
 
         // create table if not exist
         // BIG SEREAL 🤣😂🤣
+        // So, for the record, this, in practice, should be done in an init container to avoid unnecessary lock
         client.execute(
             r#"
             CREATE TABLE IF NOT EXISTS pings (
@@ -43,7 +44,8 @@ pub async fn ping_logger(
             "#,
             &[],
         ).await?;
-
+        
+        // No messy upsert, plain old atomic insert
         client
             .execute("INSERT INTO pings (sess_req_cnt) VALUES ($1)",
                 &[&(count as i64)]
@@ -55,7 +57,7 @@ pub async fn ping_logger(
     .await;
 
     match result {
-        Ok(()) => format!("Session request count {} - saved to DB.", count),
+        Ok(()) => format!("{} Session request count {} - saved to DB.", version, count),
         Err(e) => format!("Pong {} - faled to save: {}", count, e),
     }
 }

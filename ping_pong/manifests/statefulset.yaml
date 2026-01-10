@@ -8,44 +8,15 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ping-pong
+      app: ping-pong-pg
   template:
     metadata:
       labels:
-        app: ping-pong
+        app: ping-pong-pg
     spec:
       containers:
-        - name: ping-pong
-          image: PINGPONG/IMAGE
-          imagePullPolicy: Always
-          ports:
-            - name: ping
-              containerPort: 8089
-          env:
-            - name: DB_USER
-              valueFrom:
-                secretKeyRef:
-                  key: user
-                  name: ping-pong-db-secret
-            - name: DB_PASS
-              valueFrom:
-                secretKeyRef:
-                  key: password
-                  name: ping-pong-db-secret
-            - name: DB_NAME
-              valueFrom:
-                secretKeyRef:
-                  key: db
-                  name: ping-pong-db-secret
-          resources:
-            requests:
-              cpu: "30m"
-              memory: "32Mi"
-            limits:
-              cpu: "60m"
-              memory: "32Mi"
         - name: postgres
-          image: PINGPONG-DB/IMAGE
+          image: postgres:13
           readinessProbe:
             initialDelaySeconds: 10
             periodSeconds: 5

@@ -65,3 +65,4 @@
 - [5.4 Wikipedia with init and sidecar](https://github.com/classroom-dee/hobbernetes/tree/5.4/chapter6/wiki-copy)
 - [5.5 Platform comparison]()
 - [5.6 Trying serverless](https://github.com/classroom-dee/hobbernetes/tree/5.6/chapter6/knative)
+- [5.7 Deploy to serverless](https://github.com/classroom-dee/hobbernetes/tree/5.7/ping_pong)

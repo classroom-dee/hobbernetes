@@ -1,0 +1,34 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: ping-pong
+  namespace: exercises
+spec:
+  template:
+    spec:
+      containers:
+        - image: xuanminator/ping-pong:5.7
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PINGPONG_VERSION
+              value: V1
+            - name: PINGPONG_PORT
+              value: "8080"
+            - name: DB_HOST
+              value: ping-pong-pg-svc
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  key: user
+                  name: ping-pong-db-secret
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: ping-pong-db-secret
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: db
+                  name: ping-pong-db-secret
