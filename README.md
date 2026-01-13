@@ -66,3 +66,4 @@
 - [5.5 Platform comparison]()
 - [5.6 Trying serverless](https://github.com/classroom-dee/hobbernetes/tree/5.6/chapter6/knative)
 - [5.7 Deploy to serverless](https://github.com/classroom-dee/hobbernetes/tree/5.7/ping_pong)
+- [5.8 Landscape](https://github.com/classroom-dee/hobbernetes/tree/5.8/chapter6/landscape)

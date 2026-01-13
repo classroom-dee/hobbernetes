@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Base + Overlay Switcher</title>
+
+  <!-- Ubuntu font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5.3.3 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Misc css -->
+  <link href="./index.css" rel="stylesheet">
+
+</head>
+
+<body class="bg-light">
+  <!-- Top header / nav -->
+  <header class="sticky-top bg-white border-bottom">
+    <!-- <nav class="container py-2"> -->
+    <nav class="navbar navbar-expand-lg bg-body-tertiary container">
+      <a class="navbar-brand" href="#">My Landscape</a>
+      <ul class="nav overlay-nav flex-nowrap overflow-auto">
+        <!-- data-key matches the overlay/description key in JS -->
+        <li class="nav-item"><button class="nav-link active" type="button" data-key="ov1">Course-specific</button></li>
+        <li class="nav-item"><button class="nav-link" type="button" data-key="ov2">Unsuspecting components</button></li>
+        <li class="nav-item"><button class="nav-link" type="button" data-key="ov3">Dependencies and addons</button></li>
+        <li class="nav-item"><button class="nav-link" type="button" data-key="ov4">I've used these! Me, me, me!</button></li>
+        <li class="nav-item"><button class="nav-link" type="button" data-key="ov5">Components tree(?)</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Main layout -->
+  <main class="container py-4">
+    <div class="row g-4 align-items-start">
+      <!-- Left: Images -->
+      <div class="col-12 col-lg-7">
+        <div class="stage-wrap">
+          <div class="stage shadow-sm" id="stage">
+            <!-- Base image (always visible) -->
+            <img src="base.png" alt="Base image">
+
+            <!-- Overlays (transparent backgrounds recommended: PNG/WebP) -->
+            <img class="overlay is-active" data-key="ov1" src="overlay1.png" alt="Overlay 1">
+            <img class="overlay" data-key="ov2" src="overlay2.png" alt="Overlay 2">
+            <img class="overlay" data-key="ov3" src="overlay3.png" alt="Overlay 3">
+            <img class="overlay" data-key="ov4" src="overlay4.png" alt="Overlay 4">
+            <img class="overlay" data-key="ov5" src="overlay5.png" alt="Overlay 5">
+          </div>
+
+          <div class="text-muted small mt-2">
+            Click image: enlarge / Press Esc: minimize
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Description -->
+      <div class="col-12 col-lg-5">
+        <div class="p-3 p-md-4 bg-white border rounded-4 shadow-sm">
+          <h2 class="h5 mb-3">Details</h2>
+
+          <!-- One description block per overlay -->
+          <div class="desc-host">
+            <div class="desc is-active" data-key="ov1">
+              <ul class="mb-0">
+                <li><strong>Kubernetes:</strong> The main hero for the course.</li>
+                <li><strong>NATS:</strong> Used in the later parts of the course for discord alert.</li>
+                <li><strong>Helm:</strong> Used to intsall various resources and components during the course.</li>
+                <li><strong>Argo:</strong> Used in part 5 to facilitate GitOps inside GKE cluster.</li>
+                <li><strong>Istio:</strong> Main dish(dare I say) of part 6 for service mesh implementation.</li>
+                <li><strong>K3s:</strong> Used as local test cluster mainly in the earlier parts and part 6 of the course.</li(dare I say)>
+                <li><strong>Knative:</strong> A serverless extension for K8S that I learned in part 6.</li>
+                <li><strong>Prometheus:</strong> Used mainly in part 4(I think) for monitoring with the loki addon.</li>
+                <li><strong>Grafana:</strong> Used in conjunction with Prometheus to visualize logs and metrics.</li>
+                <li><strong>Kiali:</strong> Comes with Istio as addon. Used to visualize mesh traffic and health.</li>
+              </ul>
+            </div>
+
+            <div class="desc" data-key="ov2">
+              <ul class="mb-0">
+                <li><strong>CoreDNS:</strong> Unknowingly included in K8S. Backbone of in-cluster name resolution.</li>
+                <li><strong>etcd:</strong> Cluster state k-v storage. It was there all the time!</li>
+                <li><strong>envoy:</strong> Data plane backbone for things like Istio. The actual traffic enforcers in meshes disguised as sidecars.</li>
+                <li><strong>traefik:</strong> The ingress controller that I used for k3d cluster.</li>
+                <li><strong>linkerd:</strong> Not used. Accidently included it.</li>
+                <li><strong>containerd:</strong> Missed a square for this. Standard container runtime for k8s via CRI-O.</li>
+                <li><strong>CRI-O:</strong> The container runtime interface that k8s uses for standard environment.</li>
+                <li><strong>CNI:</strong> Provides pod networking and network components interoperability. Things like Flannel works on top of this.</li>
+                <li><strong>Flannel:</strong> A CNI plugin for pod communication. let's pods talk over different namespaces. I probably have used this unknowingly with k3d.</li>
+                <li><strong>Fluentd:</strong> Collects logs and forwards it to consumers. GKE seemed to run this as default on cluster creation along with Prometheus.</li>
+              </ul>
+            </div>
+
+            <div class="desc" data-key="ov3">
+              <ul class="mb-0">
+                <li><strong>Redis:</strong> Used(not cloud-based) briefly in the simple http app to facilitate `todo-added` and `todo-done` message delivery.</li>
+                <li><strong>PostgreSQL:</strong> Same as above, used(not cloud-based) in the simple http app for statefulness.</li>
+                <li><strong>rust-rs:</strong> Used to build a custom controller for assignment in part 6.</li>
+                <li><strong>nginx:</strong> Used in part 6 to reverse-proxy the simple wiki clone app.</li>
+              </ul>
+            </div>
+
+            <div class="desc" data-key="ov4">
+              <ul class="mb-0">
+                <li><strong>Oracle:</strong> Used in a web project DB in other project.</li>
+                <li><strong>MariaDB:</strong> Used at work for image metadata storage.</li>
+                <li><strong>MySQL:</strong> Used in a web project DB in other project.</li>
+                <li><strong>Pulsar:</strong> Used in a project for data pre-processing.</li>
+                <li><strong>Spark:</strong> Used in multiple projects for batch processing.</li>
+                <li><strong>Kafka:</strong> Used in multiple projects for stream processing and queuing.</li>
+                <li><strong>Flink:</strong> Used in a project for real time data capture.</li>
+                <li><strong>Jenkins:</strong> Used in a project for push-based CI/CD.</li>
+                <li><strong>AWS:</strong> Used in multiple data pipeline projects.</li>
+                <li><strong>MetalLB:</strong> Used in a local bare metal K8S setup exercise.</li>
+                <li><strong>MinIO:</strong> Used in a data pipeline project to test object storage manipulation from local.</li>
+                <li><strong>Calico:</strong> Used in conjunction with the above MetalLB cluster.</li>
+                <li><strong>Terraform:</strong> Used in multiple pipeline projects for declarative management of AWS resources.</li>
+                <li><strong>Elastic:</strong> Used in a project to facilitate fast, distributed and fuzzy text search from a large news database.</li>
+                <li><strong>Opensearch:</strong> Same as above</li>
+                <li><strong>Logstash:</strong> Used in projects for log stream transformation along with Kibana and Elasticsearch.</li>
+              </ul>
+            </div>
+
+            <div class="desc" data-key="ov5">
+              <ul class="mb-0">
+                <li><strong>Red squares:</strong> The default backbone of K8S. Included in vanilla!</li>
+                <li><strong>Green squares:</strong> And then we use these on top of the red ones. Core or essential components.</li>
+                <li><strong>Purple squares:</strong> Optional components that I used in the course.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+  <!-- Image modal -->
+  <div class="modal fade" id="zoomModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Full size</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-0">
+          <div class="zoom-canvas">
+            <div class="zoom-stage">
+              <img id="zoomBase" src="base.png" alt="Base (full size)">
+              <img id="zoomOverlay" alt="Overlay (full size)">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // --- Simple overlay + description switcher with fade ---
+    const FADE_MS = 200; // keep in sync with CSS var --fade-ms if you change it
+    const buttons = document.querySelectorAll('.overlay-nav .nav-link');
+    const overlays = document.querySelectorAll('.overlay');
+    const descs = document.querySelectorAll('.desc');
+
+    let activeKey = 'ov1';
+
+    function setActive(key) {
+      if (key === activeKey) return;
+
+      // update nav active state
+      buttons.forEach(b => b.classList.toggle('active', b.dataset.key === key));
+
+      // fade out current overlay/desc, then fade in new
+      const currentOverlay = document.querySelector(`.overlay[data-key="${activeKey}"]`);
+      const nextOverlay = document.querySelector(`.overlay[data-key="${key}"]`);
+      const currentDesc = document.querySelector(`.desc[data-key="${activeKey}"]`);
+      const nextDesc = document.querySelector(`.desc[data-key="${key}"]`);
+      
+      if (currentOverlay) currentOverlay.classList.remove('is-active');
+      if (currentDesc) currentDesc.classList.remove('is-active');
+
+      if (nextOverlay) nextOverlay.classList.add('is-active');
+      if (nextDesc) nextDesc.classList.add('is-active');
+      activeKey = key;
+    }
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => setActive(btn.dataset.key));
+    });
+
+    const stage = document.getElementById('stage');
+    const zoomModal = new bootstrap.Modal(document.getElementById('zoomModal'));
+    const zoomOverlayImg = document.getElementById('zoomOverlay');
+
+    stage.addEventListener('click', () => {
+      const activeOverlay = document.querySelector('.overlay.is-active');
+      zoomOverlayImg.src = activeOverlay ? activeOverlay.src : '';
+      zoomOverlayImg.style.display = activeOverlay ? 'block' : 'none';
+      zoomModal.show();
+    });
+  </script>
+
+  <!-- Bootstrap JS (optional; not required for this, but harmless to include) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

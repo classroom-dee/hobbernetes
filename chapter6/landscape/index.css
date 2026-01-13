@@ -1,0 +1,94 @@
+:root { --fade-ms: 200ms; }
+
+body { font-family: "Ubuntu", system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+
+/* Left image stage */
+.stage {
+  position: relative;
+  width: 100%;
+  /* Optional: give it a subtle frame */
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: .75rem;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.stage img {
+  width: 100%;
+  height: auto;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity var(--fade-ms) ease-in-out;
+  pointer-events: none; /* overlay shouldn't block clicks */
+}
+
+.overlay.is-active {
+  opacity: 1;
+}
+
+/* Description fade */
+.desc-host { position: relative; min-height: 220px; }
+.desc {
+  position: static;
+  inset: auto;
+  display: none;
+  opacity: 1;
+  transition: none;
+  pointer-events: none;
+}
+.desc.is-active {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Make navbar items look like tabs */
+.overlay-nav .nav-link {
+  border-radius: 999px;
+  margin-right: .5rem;
+}
+
+.stage-wrap { max-width: 100%; }
+
+@media (min-width: 992px) {
+  .row.g-4 { --bs-gutter-x: 2.5rem; }            
+  .stage { max-height: calc(100vh - 160px); }
+  .stage img { max-height: calc(100vh - 160px); object-fit: contain; }
+}
+
+/* MODAL */
+/* ADD: full-size viewer (scroll around the original pixels) */
+.zoom-canvas{
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background: #111;
+}
+
+.zoom-stage{
+  position: relative;
+  display: inline-block; /* shrink-wrap to image natural size */
+  margin: 1rem;
+}
+
+.zoom-stage img{
+  width: auto;
+  height: auto;
+  display: block;
+  max-width: none;  /* don't auto-fit */
+  max-height: none;
+}
+
+#zoomOverlay{
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
